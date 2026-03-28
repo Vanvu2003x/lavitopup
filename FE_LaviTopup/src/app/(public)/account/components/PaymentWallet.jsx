@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import {
@@ -12,12 +12,12 @@ import {
 
 import { useToast } from "@/components/ui/Toast";
 import { getUrlPayment } from "@/services/payment.service";
-import { getSocket } from "@/services/websocket.service";
+import { connectSocket } from "@/services/websocket.service";
 
 const presetAmounts = [20000, 50000, 100000, 200000, 500000];
 const formatCurrency = (value) => `${new Intl.NumberFormat("vi-VN").format(Number(value || 0))} VND`;
 
-export default function PaymentWallet({ onClose }) {
+export default function PaymentWallet({ onClose, onPaymentSuccess }) {
     const [amount, setAmount] = useState("");
     const [loading, setLoading] = useState(false);
     const [qrData, setQrData] = useState(null);
@@ -25,20 +25,19 @@ export default function PaymentWallet({ onClose }) {
     const toast = useToast();
 
     useEffect(() => {
-        const socket = getSocket();
-        if (!socket) return;
-
         const handlePaymentSuccess = (data) => {
             setPaymentSuccess(data);
+            onPaymentSuccess?.(data);
             toast.success("Nạp tiền thành công!");
         };
 
-        socket.on("payment_success", handlePaymentSuccess);
+        const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+        const connection = connectSocket(token, undefined, undefined, handlePaymentSuccess);
 
         return () => {
-            socket.off("payment_success", handlePaymentSuccess);
+            connection?.unsubscribe?.();
         };
-    }, [toast]);
+    }, [onPaymentSuccess, toast]);
 
     const handlePayment = async () => {
         if (!amount || Number(amount) < 10000) {

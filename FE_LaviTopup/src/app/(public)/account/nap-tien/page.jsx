@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { FiCheckCircle, FiClock, FiCreditCard, FiPlusCircle, FiXCircle } from "react-icons/fi";
@@ -57,22 +57,32 @@ export default function DepositHistoryPage() {
     const [totalPages, setTotalPages] = useState(1);
     const [showPayment, setShowPayment] = useState(false);
 
-    useEffect(() => {
-        const fetchLogs = async () => {
-            setLoading(true);
-            try {
-                const data = await getLogByUser(page);
-                setLogs(data.data || []);
-                setTotalPages(data.totalPages || 1);
-            } catch (error) {
-                console.error("Failed to load deposit logs", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+    const fetchLogs = async (targetPage = page) => {
+        setLoading(true);
+        try {
+            const data = await getLogByUser(targetPage);
+            setLogs(data.data || []);
+            setTotalPages(data.totalPages || 1);
+        } catch (error) {
+            console.error("Failed to load deposit logs", error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
-        fetchLogs();
+    useEffect(() => {
+        fetchLogs(page);
     }, [page]);
+
+    const handlePaymentSuccess = async () => {
+        if (page !== 1) {
+            setPage(1);
+            await fetchLogs(1);
+            return;
+        }
+
+        await fetchLogs(1);
+    };
 
     return (
         <>
@@ -173,7 +183,10 @@ export default function DepositHistoryPage() {
             {showPayment ? (
                 <div className="fixed inset-0 z-[80] flex items-center justify-center bg-[#020817]/80 p-4 backdrop-blur-md">
                     <div className="max-h-[90vh] w-full overflow-y-auto">
-                        <PaymentWallet onClose={() => setShowPayment(false)} />
+                        <PaymentWallet
+                            onClose={() => setShowPayment(false)}
+                            onPaymentSuccess={handlePaymentSuccess}
+                        />
                     </div>
                 </div>
             ) : null}
