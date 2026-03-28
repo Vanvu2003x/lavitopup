@@ -1,6 +1,5 @@
 import Image from "next/image";
 import Link from "next/link";
-import { BsMessenger } from "react-icons/bs";
 import { FaFacebookF } from "react-icons/fa";
 
 export default function Footer() {
@@ -25,22 +24,13 @@ export default function Footer() {
 
                     <div className="mt-5 flex flex-wrap gap-3">
                         <a
-                            href="https://www.facebook.com/sp.shopgenshin24h"
+                            href="https://www.facebook.com/messages/e2ee/t/1484722313227044"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="glass-panel inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-1"
                         >
                             <FaFacebookF className="text-[#ff8456]" />
-                            Fanpage
-                        </a>
-                        <a
-                            href="https://m.me/sp.shopgenshin24h"
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="glass-panel inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-white transition hover:-translate-y-1"
-                        >
-                            <BsMessenger className="text-[#53e5c6]" />
-                            Messenger
+                            FB
                         </a>
                     </div>
                 </div>
@@ -73,10 +63,10 @@ export default function Footer() {
                     <div id="ho-tro" className="surface-card mt-4 scroll-mt-28 rounded-[1.6rem] p-5">
                         <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#53e5c6]">Hỗ trợ 24/7</p>
                         <p className="mt-2 text-sm leading-6 text-[#9fb5da]">
-                            Cần kiểm tra đơn hàng hoặc thông tin nạp, bạn có thể liên hệ ngay qua fanpage.
+                            Cần kiểm tra đơn hàng hoặc thông tin nạp, bạn có thể liên hệ ngay qua FB.
                         </p>
                         <a
-                            href="https://www.facebook.com/sp.shopgenshin24h"
+                            href="https://www.facebook.com/messages/e2ee/t/1484722313227044"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="mt-4 inline-flex rounded-full bg-[#ff8456] px-4 py-2 text-sm font-bold text-[#08111f] transition hover:bg-[#ff976f]"

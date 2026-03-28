@@ -225,7 +225,7 @@ export default function Sidebar() {
                     <h3 className="text-white font-semibold text-base mb-1">Hỗ Trợ 24/7</h3>
                     <p className="text-slate-400 text-[11px] mb-4 font-normal">Nạp lỗi? Gặp sự cố? <span className="text-cyan-400 font-medium">Admin xử lý ngay!</span></p>
                     <a
-                        href="https://www.facebook.com/sp.shopgenshin24h"
+                        href="https://www.facebook.com/messages/e2ee/t/1484722313227044"
                         target="_blank"
                         className="block w-full py-3 bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-medium rounded-xl transition-all text-xs shadow-md"
                     >

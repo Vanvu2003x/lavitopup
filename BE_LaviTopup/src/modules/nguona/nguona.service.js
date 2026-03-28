@@ -42,11 +42,11 @@ const resolveNumber = (value, fallback = 0) => {
 const buildApiPrice = (remotePrice) => Math.ceil(toNumber(remotePrice, 0));
 
 const resolveRemotePackagePrice = (remotePackage = {}) =>
+    remotePackage?.price ??
     remotePackage?.originalPrice ??
     remotePackage?.sellPriceUsdAdmin ??
     remotePackage?.sellPriceUsdAgent ??
     remotePackage?.sellPriceUsd ??
-    remotePackage?.price ??
     0;
 
 const getMarkupCoefficient = (game) => {

@@ -1,6 +1,5 @@
 "use client";
 
-import { BsMessenger } from "react-icons/bs";
 import { FaFacebookF } from "react-icons/fa";
 import Footer from "@/components/layout/Footer";
 import Header from "@/components/layout/Header";
@@ -21,24 +20,14 @@ export default function PublicLayout({ children }) {
 
             <div className="fixed bottom-5 right-4 z-50 flex flex-col gap-3 sm:right-6">
                 <a
-                    href="https://www.facebook.com/sp.shopgenshin24h"
+                    href="https://www.facebook.com/messages/e2ee/t/1484722313227044"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="glass-panel flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-1"
-                    title="Fanpage LaviTopup"
+                    title="FB LaviTopup"
                 >
                     <FaFacebookF className="text-[#ff8456]" />
-                    <span>Fanpage</span>
-                </a>
-                <a
-                    href="https://m.me/sp.shopgenshin24h"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="glass-panel flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-1"
-                    title="Nhắn hỗ trợ"
-                >
-                    <BsMessenger className="text-[#53e5c6]" />
-                    <span>Nhắn hỗ trợ</span>
+                    <span>FB</span>
                 </a>
             </div>
         </div>

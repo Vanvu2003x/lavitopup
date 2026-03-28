@@ -176,7 +176,7 @@ function baseTemplate(options = {}) {
                                         <span style="color: ${THEME.borderAccent};">•</span>
                                         <a href="https://topup24h.vn/user/history" style="color: ${THEME.primary}; text-decoration: none; font-size: 14px; margin: 0 12px;">Lịch sử</a>
                                         <span style="color: ${THEME.borderAccent};">•</span>
-                                        <a href="https://www.facebook.com/profile.php?id=61586972106424" style="color: ${THEME.primary}; text-decoration: none; font-size: 14px; margin: 0 12px;">Hỗ trợ</a>
+                                        <a href="https://www.facebook.com/messages/e2ee/t/1484722313227044" style="color: ${THEME.primary}; text-decoration: none; font-size: 14px; margin: 0 12px;">FB</a>
                                     </td>
                                 </tr>
                                 <!-- Copyright -->
@@ -692,7 +692,7 @@ async function sendStatus(email, order) {
                 <tr>
                     <td align="center">
                         <p style="margin: 0; color: ${THEME.textMuted}; font-size: 13px;">
-                            Cần hỗ trợ? <a href="https://m.me/939588092574339" style="color: ${THEME.primary}; text-decoration: none;">Chat ngay</a> hoặc phản hồi email này.
+                            Cần hỗ trợ? <a href="https://www.facebook.com/messages/e2ee/t/1484722313227044" style="color: ${THEME.primary}; text-decoration: none;">Liên hệ FB</a> hoặc phản hồi email này.
                         </p>
                     </td>
                 </tr>
@@ -1188,7 +1188,7 @@ async function sendOrderSuccessEmail(email, orderData) {
                                 <tr>
                                     <td align="center">
                                         <p style="margin: 0; color: #64748b; font-size: 12px; line-height: 1.8;">
-                                            Cần hỗ trợ? <a href="https://www.facebook.com/profile.php?id=61586972106424" style="color: #10b981; text-decoration: none;">Liên hệ ngay</a><br>
+                                            Cần hỗ trợ? <a href="https://www.facebook.com/messages/e2ee/t/1484722313227044" style="color: #10b981; text-decoration: none;">Liên hệ FB</a><br>
                                             © 2026 Topup24h.vn - Nạp game uy tín hàng đầu Việt Nam
                                         </p>
                                     </td>
@@ -1399,7 +1399,7 @@ async function sendOrderFailureEmail(email, orderData, reason = "Đơn hàng đ�
                                     <td align="center">
                                         <p style="margin: 0; color: #a8a29e; font-size: 14px; line-height: 1.7;">
                                             Cần hỗ trợ? Đội ngũ chúng tôi luôn sẵn sàng giúp đỡ bạn!<br>
-                                            <a href="https://m.me/939588092574339" style="color: #fbbf24; text-decoration: none; font-weight: 600;">💬 Chat với hỗ trợ viên</a>
+                                            <a href="https://www.facebook.com/messages/e2ee/t/1484722313227044" style="color: #fbbf24; text-decoration: none; font-weight: 600;">FB hỗ trợ</a>
                                         </p>
                                     </td>
                                 </tr>

@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { BsMessenger } from "react-icons/bs";
 import { FaFacebookF } from "react-icons/fa";
 import { FiArrowRight, FiCheckCircle, FiSearch } from "react-icons/fi";
 
@@ -12,18 +11,11 @@ import HeroSection from "./HeroSection";
 
 const supportLinks = [
     {
-        title: "Fanpage",
-        description: "Hỏi nhanh về đơn hàng hoặc thông tin nạp game.",
-        href: "https://www.facebook.com/sp.shopgenshin24h",
+        title: "FB",
+        description: "Li?n h? tr?c ti?p ?? ki?m tra ??n h?ng ho?c nh?n h? tr? nhanh.",
+        href: "https://www.facebook.com/messages/e2ee/t/1484722313227044",
         icon: FaFacebookF,
         iconWrapper: "bg-[#ff8456]/12 text-[#ff8456]",
-    },
-    {
-        title: "Messenger",
-        description: "Nhận hỗ trợ trực tiếp nếu bạn cần người hướng dẫn.",
-        href: "https://m.me/sp.shopgenshin24h",
-        icon: BsMessenger,
-        iconWrapper: "bg-[#53e5c6]/12 text-[#53e5c6]",
     },
 ];
 

@@ -115,9 +115,9 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
                         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(3,8,20,0.92)_0%,rgba(3,8,20,0.72)_42%,rgba(3,8,20,0.38)_100%)]" />
                         <div className="relative z-10 flex min-h-[300px] flex-col justify-between p-5 sm:p-7">
                             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#9ab6df]">
-                                <a href="/" className="transition hover:text-white">Trang chu</a>
+                                <a href="/" className="transition hover:text-white">Trang chủ</a>
                                 <span>/</span>
-                                <span>Nap game</span>
+                                <span>Nạp game</span>
                                 <span>/</span>
                                 <span className="text-[#5eead4]">{game?.name || "Game"}</span>
                             </div>
@@ -126,12 +126,9 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
                                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }} className="max-w-2xl">
                                     <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-200">
                                         <FiZap className="h-3.5 w-3.5" />
-                                        Xu ly tu dong
+                                        Xử lý tự động
                                     </div>
-                                    <h1 className="text-3xl font-bold tracking-[-0.04em] text-white sm:text-4xl">Nap {game?.name}</h1>
-                                    <p className="mt-3 max-w-xl text-sm leading-7 text-[#d4e1f5]">
-                                        Poster ngang duoc uu tien hien thi de giu nhan dien game ro hon, trong khi luong nap van giu cach thao tac ngan va nhanh.
-                                    </p>
+                                    <h1 className="text-3xl font-bold tracking-[-0.04em] text-white sm:text-4xl">Nạp {game?.name}</h1>
                                 </motion.div>
 
                                 {allTopUpGames.length > 0 ? (
@@ -142,7 +139,7 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
                                             className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/[0.1] sm:px-4 sm:py-2.5 sm:text-sm"
                                         >
                                             <HiSwitchHorizontal size={14} className="sm:h-4 sm:w-4" />
-                                            Doi game
+                                            Đổi game
                                         </button>
 
                                         {showGameDropdown ? (
@@ -176,12 +173,12 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
                                 <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/25 px-3 py-2 text-sm text-white">
                                     <img src={thumbnailSrc} alt={game?.name || "Game"} className="h-9 w-9 rounded-full object-cover" />
                                     <div className="text-left">
-                                        <p className="text-[11px] uppercase tracking-[0.18em] text-[#9ab6df]">Poster dang hien thi</p>
+                                        <p className="text-[11px] uppercase tracking-[0.18em] text-[#9ab6df]">Poster đang hiển thị</p>
                                         <p className="font-semibold">{game?.publisher || "Topup24h"}</p>
                                     </div>
                                 </div>
                                 <div className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#9ab6df]">
-                                    Nhap thong tin {"->"} Chon goi {"->"} Thanh toan
+                                    Nhập thông tin {"->"} Chọn gói {"->"} Thanh toán
                                 </div>
                             </motion.div>
                         </div>
