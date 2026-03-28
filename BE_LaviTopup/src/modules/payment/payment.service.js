@@ -36,13 +36,13 @@ async function addLogDirect(data) {
 
 const PaymentService = {
     createQR: async (user, amount) => {
-        if (!amount) throw { status: 400, message: "Thiếu amount" };
+        if (!amount) throw { status: 400, message: "Thiáº¿u amount" };
 
         // VietQR API config
         const bankBin = "970422"; // MB Bank BIN code
-        const bankName = "MB Bank";
+        const bankName = "MBBank";
         const stk = "0963575203";
-        const chusohuu = "VU DINH VAN";
+        const chusohuu = "Vu DINH VAN";
 
         const Log = await addLogDirect({ user_id: user.id, amount });
 
@@ -76,22 +76,22 @@ const PaymentService = {
         }
 
         if (data.status === true && Array.isArray(data.data)) {
-            // Load tất cả walletLog đang chờ để khớp mềm
+            // Load táº¥t cáº£ walletLog Ä‘ang chá» Ä‘á»ƒ khá»›p má»m
             const { sql: sqlOp, or } = require("drizzle-orm");
             const pendingLogs = await db.select().from(walletLogs)
-                .where(sqlOp`${walletLogs.status} IN ('pending', 'Đang Chờ', 'wait')`);
+                .where(sqlOp`${walletLogs.status} IN ('pending', 'Äang Chá»', 'wait')`);
 
             for (const value of data.data) {
                 try {
                     const rawDesc = (value.description || '').toLowerCase();
 
-                    // Chuẩn hóa description: bỏ ký tự không phải chữ-số-khoảng trắng
-                    // "MB DON123", "VCB_DON123", "don 123" → "mb don123", "vcb don123", "don 123"
+                    // Chuáº©n hÃ³a description: bá» kÃ½ tá»± khÃ´ng pháº£i chá»¯-sá»‘-khoáº£ng tráº¯ng
+                    // "MB DON123", "VCB_DON123", "don 123" â†’ "mb don123", "vcb don123", "don 123"
                     const normalizedDesc = rawDesc.replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim();
 
                     let matchedLog = null;
 
-                    // Ưu tiên 1: Khớp chính xác format cũ AZ{ID}ZA hoặc KB{ID}KB
+                    // Æ¯u tiÃªn 1: Khá»›p chÃ­nh xÃ¡c format cÅ© AZ{ID}ZA hoáº·c KB{ID}KB
                     const strictMatch = value.description.match(/AZ([A-F0-9]{16})ZA/i)
                         || value.description.match(/KB\.?([A-F0-9]{16})\.?KB/i)
                         || value.description.match(/KB\.?([A-F0-9]{16})/i);
@@ -101,11 +101,11 @@ const PaymentService = {
                         matchedLog = pendingLogs.find(l => l.id.toLowerCase() === logId.toLowerCase());
                     }
 
-                    // Ưu tiên 2: Khớp mềm — description chứa logId (bỏ qua case & ký tự đặc biệt)
+                    // Æ¯u tiÃªn 2: Khá»›p má»m â€” description chá»©a logId (bá» qua case & kÃ½ tá»± Ä‘áº·c biá»‡t)
                     if (!matchedLog) {
                         matchedLog = pendingLogs.find(log => {
                             const logIdNorm = log.id.toLowerCase().replace(/[^a-z0-9]/g, '');
-                            // Check cả raw description và normalized description
+                            // Check cáº£ raw description vÃ  normalized description
                             return rawDesc.includes(log.id.toLowerCase())
                                 || normalizedDesc.replace(/\s/g, '').includes(logIdNorm)
                                 || normalizedDesc.includes(logIdNorm);
@@ -116,33 +116,33 @@ const PaymentService = {
                         const amount = Number(value.amount);
                         const expectedAmount = Number(matchedLog.amount);
 
-                        console.log(`[Webhook] Khớp memo: "${value.description}" → logId: ${matchedLog.id}. Cần: ${expectedAmount}, Nhận: ${amount}`);
+                        console.log(`[Webhook] Khá»›p memo: "${value.description}" â†’ logId: ${matchedLog.id}. Cáº§n: ${expectedAmount}, Nháº­n: ${amount}`);
 
                         if (amount === expectedAmount) {
-                            // Chuyển khoản ĐÚNG số tiền
-                            await UserService.updateBalance(matchedLog.user_id, amount, 'credit', 'Nạp tiền qua ngân hàng (Auto)');
+                            // Chuyá»ƒn khoáº£n ÄÃšNG sá»‘ tiá»n
+                            await UserService.updateBalance(matchedLog.user_id, amount, 'credit', 'Náº¡p tiá»n qua ngÃ¢n hÃ ng (Auto)');
 
                             await db.update(walletLogs)
                                 .set({
-                                    status: "Thành Công",
+                                    status: "ThÃ nh CÃ´ng",
                                     amount: amount,
                                     updated_at: new Date()
                                 })
                                 .where(eq(walletLogs.id, matchedLog.id));
                         } else {
-                            // Chuyển khoản SAI số tiền (ví dụ nạp thiếu) -> Cập nhật thành Thất bại
-                            console.warn(`[Webhook] Sai số tiền cho logId: ${matchedLog.id}. Cần: ${expectedAmount}, Thực nhận: ${amount}. Giao dịch thất bại.`);
+                            // Chuyá»ƒn khoáº£n SAI sá»‘ tiá»n (vÃ­ dá»¥ náº¡p thiáº¿u) -> Cáº­p nháº­t thÃ nh Tháº¥t báº¡i
+                            console.warn(`[Webhook] Sai sá»‘ tiá»n cho logId: ${matchedLog.id}. Cáº§n: ${expectedAmount}, Thá»±c nháº­n: ${amount}. Giao dá»‹ch tháº¥t báº¡i.`);
 
                             await db.update(walletLogs)
                                 .set({
-                                    status: "Thất Bại",
-                                    amount: amount, // Có thể lưu lại số tiền thực nhận để đối soát
+                                    status: "Tháº¥t Báº¡i",
+                                    amount: amount, // CÃ³ thá»ƒ lÆ°u láº¡i sá»‘ tiá»n thá»±c nháº­n Ä‘á»ƒ Ä‘á»‘i soÃ¡t
                                     updated_at: new Date()
                                 })
                                 .where(eq(walletLogs.id, matchedLog.id));
                         }
                     } else {
-                        console.warn(`[Webhook] Không khớp giao dịch nào: "${value.description}"`);
+                        console.warn(`[Webhook] KhÃ´ng khá»›p giao dá»‹ch nÃ o: "${value.description}"`);
                     }
                 } catch (err) {
                     console.error("Error processing transaction:", err);

@@ -30,7 +30,7 @@ export default function PaymentWallet({ onClose }) {
 
         const handlePaymentSuccess = (data) => {
             setPaymentSuccess(data);
-            toast.success("Nạp tiền thành công!");
+            toast.success("Náº¡p tiá»n thÃ nh cÃ´ng!");
         };
 
         socket.on("payment_success", handlePaymentSuccess);
@@ -42,7 +42,7 @@ export default function PaymentWallet({ onClose }) {
 
     const handlePayment = async () => {
         if (!amount || Number(amount) < 10000) {
-            toast.error("Vui lòng nạp tối thiểu 10.000đ");
+            toast.error("Vui lÃ²ng náº¡p tá»‘i thiá»ƒu 10.000Ä‘");
             return;
         }
 
@@ -57,7 +57,7 @@ export default function PaymentWallet({ onClose }) {
             setQrData(res || null);
         } catch (error) {
             console.error("Payment error:", error);
-            toast.error("Có lỗi xảy ra khi tạo mã thanh toán");
+            toast.error("CÃ³ lá»—i xáº£y ra khi táº¡o mÃ£ thanh toÃ¡n");
         } finally {
             setLoading(false);
         }
@@ -68,10 +68,10 @@ export default function PaymentWallet({ onClose }) {
 
         try {
             await navigator.clipboard.writeText(text);
-            toast.success("Đã sao chép");
+            toast.success("ÄÃ£ sao chÃ©p");
         } catch (error) {
             console.error("Copy error:", error);
-            toast.error("Không thể sao chép nội dung");
+            toast.error("KhÃ´ng thá»ƒ sao chÃ©p ná»™i dung");
         }
     };
 
@@ -85,14 +85,14 @@ export default function PaymentWallet({ onClose }) {
             <div className="relative z-10 border-b border-white/10 px-6 py-5 sm:px-8">
                 <div className="flex items-center justify-between gap-4">
                     <div>
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#53e5c6]">Nạp tiền vào ví</p>
-                        <h2 className="mt-2 font-sans text-2xl font-bold tracking-[-0.02em] text-white">Tạo thanh toán nhanh</h2>
+                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#53e5c6]">Náº¡p tiá»n vÃ o vÃ­</p>
+                        <h2 className="mt-2 font-sans text-2xl font-bold tracking-[-0.02em] text-white">Táº¡o thanh toÃ¡n nhanh</h2>
                     </div>
                     <button
                         type="button"
                         onClick={onClose}
                         className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.04] text-white transition hover:bg-white/[0.08]"
-                        aria-label="Đóng nạp tiền"
+                        aria-label="ÄÃ³ng náº¡p tiá»n"
                     >
                         <FiX size={20} />
                     </button>
@@ -106,11 +106,11 @@ export default function PaymentWallet({ onClose }) {
                             <FiCheckCircle size={42} />
                         </div>
                         <div>
-                            <h3 className="font-sans text-2xl font-bold text-white">Nạp tiền thành công</h3>
-                            <p className="mt-2 text-sm leading-7 text-[#a8c0e4]">Số dư mới đã được cộng vào tài khoản của bạn.</p>
+                            <h3 className="font-sans text-2xl font-bold text-white">Náº¡p tiá»n thÃ nh cÃ´ng</h3>
+                            <p className="mt-2 text-sm leading-7 text-[#a8c0e4]">Sá»‘ dÆ° má»›i Ä‘Ã£ Ä‘Æ°á»£c cá»™ng vÃ o tÃ i khoáº£n cá»§a báº¡n.</p>
                         </div>
                         <div className="glass-panel w-full max-w-md rounded-[1.8rem] p-5">
-                            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8fb5ee]">Số dư hiện tại</p>
+                            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8fb5ee]">Sá»‘ dÆ° hiá»‡n táº¡i</p>
                             <p className="mt-3 text-3xl font-black text-white">{formatCurrency(paymentSuccess.balance)}</p>
                         </div>
                         <button
@@ -118,23 +118,23 @@ export default function PaymentWallet({ onClose }) {
                             onClick={onClose}
                             className="rounded-full bg-[#53e5c6] px-5 py-3 text-sm font-bold text-[#07142d] transition hover:bg-[#6ff0d5]"
                         >
-                            Đóng cửa sổ
+                            ÄÃ³ng cá»­a sá»•
                         </button>
                     </div>
                 ) : !qrData ? (
                     <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
                         <div className="space-y-4">
                             <div className="rounded-[1.8rem] border border-white/10 bg-white/[0.04] p-5">
-                                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8fb5ee]">Lưu ý</p>
+                                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8fb5ee]">LÆ°u Ã½</p>
                                 <ul className="mt-3 space-y-2 text-sm leading-7 text-[#c0d4f2]">
-                                    <li>Nạp tối thiểu 10.000đ cho mỗi giao dịch.</li>
-                                    <li>Hệ thống sẽ tự động cộng tiền sau khi thanh toán thành công.</li>
-                                    <li>Giữ đúng nội dung chuyển khoản để giao dịch được xử lý nhanh.</li>
+                                    <li>Náº¡p tá»‘i thiá»ƒu 10.000Ä‘ cho má»—i giao dá»‹ch.</li>
+                                    <li>Há»‡ thá»‘ng sáº½ tá»± Ä‘á»™ng cá»™ng tiá»n sau khi thanh toÃ¡n thÃ nh cÃ´ng.</li>
+                                    <li>Giá»¯ Ä‘Ãºng ná»™i dung chuyá»ƒn khoáº£n Ä‘á»ƒ giao dá»‹ch Ä‘Æ°á»£c xá»­ lÃ½ nhanh.</li>
                                 </ul>
                             </div>
 
                             <div className="rounded-[1.8rem] border border-white/10 bg-white/[0.04] p-5">
-                                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8fb5ee]">Mức nạp nhanh</p>
+                                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8fb5ee]">Má»©c náº¡p nhanh</p>
                                 <div className="mt-4 flex flex-wrap gap-2">
                                     {presetAmounts.map((value) => (
                                         <button
@@ -143,7 +143,7 @@ export default function PaymentWallet({ onClose }) {
                                             onClick={() => setAmount(String(value))}
                                             className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-white transition hover:border-[#53e5c6]/40 hover:text-[#53e5c6]"
                                         >
-                                            {new Intl.NumberFormat("vi-VN").format(value)}đ
+                                            {new Intl.NumberFormat("vi-VN").format(value)}Ä‘
                                         </button>
                                     ))}
                                 </div>
@@ -151,17 +151,17 @@ export default function PaymentWallet({ onClose }) {
                         </div>
 
                         <div className="glass-panel rounded-[2rem] p-5 sm:p-6">
-                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#53e5c6]">Bước 1</p>
-                            <h3 className="mt-2 font-sans text-2xl font-bold text-white">Nhập số tiền muốn nạp</h3>
+                            <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#53e5c6]">BÆ°á»›c 1</p>
+                            <h3 className="mt-2 font-sans text-2xl font-bold text-white">Nháº­p sá»‘ tiá»n muá»‘n náº¡p</h3>
 
                             <div className="mt-5">
-                                <label className="block text-sm font-semibold text-[#d6e5ff]">Số tiền</label>
+                                <label className="block text-sm font-semibold text-[#d6e5ff]">Sá»‘ tiá»n</label>
                                 <div className="relative mt-2">
                                     <input
                                         type="number"
                                         value={amount}
                                         onChange={(e) => setAmount(e.target.value)}
-                                        placeholder="Ví dụ: 100000"
+                                        placeholder="VÃ­ dá»¥: 100000"
                                         className="h-14 w-full rounded-2xl border border-white/12 bg-[#071529]/80 px-4 pr-24 text-base font-semibold text-white outline-none transition placeholder:text-[#7f9fce] focus:border-[#53e5c6] focus:ring-4 focus:ring-[#53e5c6]/12"
                                     />
                                     <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-[#8fb5ee]">VND</span>
@@ -177,12 +177,12 @@ export default function PaymentWallet({ onClose }) {
                                 {loading ? (
                                     <>
                                         <FiLoader className="animate-spin" size={18} />
-                                        <span>Đang tạo mã thanh toán...</span>
+                                        <span>Äang táº¡o mÃ£ thanh toÃ¡n...</span>
                                     </>
                                 ) : (
                                     <>
                                         <FiCreditCard size={18} />
-                                        <span>Tạo mã QR</span>
+                                        <span>Táº¡o mÃ£ QR</span>
                                     </>
                                 )}
                             </button>
@@ -191,21 +191,21 @@ export default function PaymentWallet({ onClose }) {
                 ) : (
                     <div className="grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
                         <div className="glass-panel rounded-[2rem] p-5 text-center">
-                            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#53e5c6]">Bước 2</p>
-                            <h3 className="mt-2 font-sans text-2xl font-bold text-white">Quét mã để thanh toán</h3>
-                            <p className="mt-3 text-sm text-[#a8c0e4]">Số tiền cần thanh toán</p>
+                            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#53e5c6]">BÆ°á»›c 2</p>
+                            <h3 className="mt-2 font-sans text-2xl font-bold text-white">QuÃ©t mÃ£ Ä‘á»ƒ thanh toÃ¡n</h3>
+                            <p className="mt-3 text-sm text-[#a8c0e4]">Sá»‘ tiá»n cáº§n thanh toÃ¡n</p>
                             <p className="mt-2 text-3xl font-black text-white">{formatCurrency(amount)}</p>
 
                             <div className="mx-auto mt-6 flex h-[240px] w-[240px] items-center justify-center rounded-[2rem] bg-white p-4 shadow-[0_12px_30px_rgba(255,255,255,0.08)]">
                                 {qrData.urlPayment || qrData.qrCode ? (
                                     <img
                                         src={qrData.urlPayment || qrData.qrCode}
-                                        alt="Mã QR thanh toán"
+                                        alt="MÃ£ QR thanh toÃ¡n"
                                         className="h-full w-full object-contain"
                                     />
                                 ) : (
                                     <div className="flex h-full w-full items-center justify-center rounded-[1.4rem] bg-slate-100 px-4 text-center text-sm text-slate-500">
-                                        Không thể tải mã QR
+                                        KhÃ´ng thá»ƒ táº£i mÃ£ QR
                                     </div>
                                 )}
                             </div>
@@ -214,22 +214,22 @@ export default function PaymentWallet({ onClose }) {
                         <div className="space-y-4">
                             {[
                                 {
-                                    label: "Ngân hàng",
-                                    value: qrData.bank_name || qrData.bankName || "MB Bank",
+                                    label: "NgÃ¢n hÃ ng",
+                                    value: qrData.bank_name || qrData.bankName || "MBBank",
                                     canCopy: false,
                                 },
                                 {
-                                    label: "Số tài khoản",
+                                    label: "Sá»‘ tÃ i khoáº£n",
                                     value: qrData.accountNumber || "---",
                                     canCopy: true,
                                 },
                                 {
-                                    label: "Chủ tài khoản",
-                                    value: qrData.accountHolder || qrData.accountName || "TOPUP24H",
+                                    label: "Chá»§ tÃ i khoáº£n",
+                                    value: qrData.accountHolder || qrData.accountName || "Vu DINH VAN",
                                     canCopy: false,
                                 },
                                 {
-                                    label: "Nội dung chuyển khoản",
+                                    label: "Ná»™i dung chuyá»ƒn khoáº£n",
                                     value: qrData.memo || qrData.description || "---",
                                     canCopy: true,
                                 },
@@ -245,7 +245,7 @@ export default function PaymentWallet({ onClose }) {
                                                 type="button"
                                                 onClick={() => copyToClipboard(item.value)}
                                                 className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.04] text-[#53e5c6] transition hover:bg-white/[0.08]"
-                                                aria-label={`Sao chép ${item.label}`}
+                                                aria-label={`Sao chÃ©p ${item.label}`}
                                             >
                                                 <FiCopy size={18} />
                                             </button>
@@ -261,7 +261,7 @@ export default function PaymentWallet({ onClose }) {
                                     className="inline-flex items-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.08]"
                                 >
                                     <FiArrowLeft size={16} />
-                                    Quay lại nhập số tiền
+                                    Quay láº¡i nháº­p sá»‘ tiá»n
                                 </button>
                                 <button
                                     type="button"
@@ -269,7 +269,7 @@ export default function PaymentWallet({ onClose }) {
                                     className="inline-flex items-center gap-2 rounded-full bg-[#ff8456] px-5 py-3 text-sm font-bold text-[#08111f] transition hover:bg-[#ff976f]"
                                 >
                                     <FiCreditCard size={16} />
-                                    Đóng cửa sổ
+                                    ÄÃ³ng cá»­a sá»•
                                 </button>
                             </div>
                         </div>
