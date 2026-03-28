@@ -9,21 +9,23 @@ const beVietnam = Be_Vietnam_Pro({
     display: "swap",
 });
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://lavitopup.io.vn";
+
 export const metadata = {
-    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://lavitopup.vn"),
+    metadataBase: new URL(siteUrl),
     title: {
-        default: "LaviTopup - Nạp game và mua tài khoản giao diện mới",
+        default: "LaviTopup | Topup và tài khoản game",
         template: "%s | LaviTopup",
     },
     description:
-        "LaviTopup cung cấp trải nghiệm nạp game và mua tài khoản với giao diện mới hoàn toàn, ưu tiên tiếng Việt rõ ràng và thao tác nhanh.",
+        "LaviTopup cung cấp topup và tài khoản game với giao diện rõ ràng, thao tác nhanh và hỗ trợ trực tiếp khi cần.",
     keywords: [
-        "lavitopup",
+        "LaviTopup",
+        "topup game",
         "nạp game",
-        "shop acc",
+        "tài khoản game",
         "mua tài khoản game",
-        "nạp game tự động",
-        "giao diện nạp game mới",
+        "shop acc",
     ],
     authors: [{ name: "LaviTopup" }],
     creator: "LaviTopup",
@@ -36,11 +38,11 @@ export const metadata = {
     openGraph: {
         type: "website",
         locale: "vi_VN",
-        url: process.env.NEXT_PUBLIC_APP_URL || "https://lavitopup.vn",
+        url: siteUrl,
         siteName: "LaviTopup",
-        title: "LaviTopup - Nạp game và mua tài khoản giao diện mới",
+        title: "LaviTopup | Topup và tài khoản game",
         description:
-            "Giao diện mới hoàn toàn cho hệ thống nạp game và mua tài khoản, thiết kế lại để đẹp hơn và dễ dùng hơn.",
+            "Topup nhanh, giao diện dễ dùng và hỗ trợ trực tiếp cho các nhu cầu mua tài khoản game tại LaviTopup.",
         images: [
             {
                 url: "/banner/4e4234e67024d97d7eff34daf88b8448.png",
@@ -52,8 +54,9 @@ export const metadata = {
     },
     twitter: {
         card: "summary_large_image",
-        title: "LaviTopup - Nạp game và mua tài khoản giao diện mới",
-        description: "Bản lột xác hoàn toàn cho hệ thống nạp game và mua tài khoản.",
+        title: "LaviTopup | Topup và tài khoản game",
+        description:
+            "Topup nhanh, giao diện dễ dùng và hỗ trợ trực tiếp cho các nhu cầu mua tài khoản game tại LaviTopup.",
         images: ["/banner/4e4234e67024d97d7eff34daf88b8448.png"],
     },
     robots: {
@@ -61,7 +64,7 @@ export const metadata = {
         follow: true,
     },
     alternates: {
-        canonical: process.env.NEXT_PUBLIC_APP_URL || "https://lavitopup.vn",
+        canonical: siteUrl,
     },
 };
 

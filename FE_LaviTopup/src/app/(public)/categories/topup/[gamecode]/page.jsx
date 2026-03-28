@@ -3,33 +3,37 @@ import { getGameByGameCode, getGames } from "@/services/games.service";
 import { getImageSrc } from "@/utils/imageHelper";
 import TopUpClient from "./components/TopUpClient";
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://lavitopup.io.vn";
+
 export async function generateMetadata(props) {
     const params = await props.params;
     const gamecode = params.gamecode;
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://topup24h.vn";
 
     try {
         const game = await getGameByGameCode(gamecode);
 
         if (game) {
+            const gameName = game.custom_name || game.name;
             const shareImage = getImageSrc(game.poster || game.thumbnail);
             const iconImage = getImageSrc(game.thumbnail);
+            const canonicalUrl = `${siteUrl}/categories/topup/${gamecode}`;
 
             return {
-                title: `Nap ${game.name} gia re | Topup24h`,
-                description: `Nap ${game.name} uy tin tai Topup24h. Xu ly tu dong, ho tro 24/7 va giao dien thanh toan nhanh.`,
-                keywords: [`nap ${game.name}`, `topup ${game.name}`, `nap game ${game.name}`, "topup24h"],
+                title: `Nạp ${gameName}`,
+                description: `Nạp ${gameName} tại LaviTopup với giao diện rõ ràng, thao tác nhanh và hỗ trợ trực tiếp khi cần.`,
+                keywords: [`nạp ${gameName}`, `topup ${gameName}`, `${gameName} LaviTopup`, "LaviTopup"],
                 openGraph: {
-                    title: `Nap ${game.name} gia re | Topup24h`,
-                    description: `Nap ${game.name} uy tin tai Topup24h, xu ly nhanh va on dinh.`,
+                    title: `Nạp ${gameName} | LaviTopup`,
+                    description: `Nạp ${gameName} tại LaviTopup với thao tác nhanh, giao diện dễ dùng và hỗ trợ trực tiếp.`,
+                    url: canonicalUrl,
                     images: [shareImage],
                     type: "website",
                     locale: "vi_VN",
                 },
                 twitter: {
                     card: "summary_large_image",
-                    title: `Nap ${game.name} gia re`,
-                    description: `Dich vu nap ${game.name} uy tin tai Topup24h.`,
+                    title: `Nạp ${gameName} | LaviTopup`,
+                    description: `Nạp ${gameName} tại LaviTopup với thao tác nhanh và giao diện dễ dùng.`,
                     images: [shareImage],
                 },
                 icons: {
@@ -38,7 +42,7 @@ export async function generateMetadata(props) {
                     apple: iconImage,
                 },
                 alternates: {
-                    canonical: `${baseUrl}/categories/topup/${gamecode}`,
+                    canonical: canonicalUrl,
                 },
             };
         }
@@ -47,8 +51,11 @@ export async function generateMetadata(props) {
     }
 
     return {
-        title: "Nap game online | Topup24h",
-        description: "Trung tam nap game online uy tin, xu ly nhanh va gia tot.",
+        title: "Topup game",
+        description: "Trang topup game của LaviTopup với giao diện rõ ràng và thao tác nhanh.",
+        alternates: {
+            canonical: `${siteUrl}/categories/topup/${gamecode}`,
+        },
     };
 }
 
@@ -73,19 +80,22 @@ export default async function GameTopUpPage(props) {
         console.error("Error fetching data:", error);
     }
 
-    const jsonLd = game ? {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": `Nap game ${game.name}`,
-        "description": `Dich vu nap ${game.name} uy tin, xu ly tu dong 24/7.`,
-        "provider": {
-            "@type": "Organization",
-            "name": "Topup24h",
-            "url": process.env.NEXT_PUBLIC_APP_URL || "https://topup24h.vn",
-        },
-        "areaServed": "VN",
-        "image": getImageSrc(game.poster || game.thumbnail),
-    } : null;
+    const jsonLd = game
+        ? {
+              "@context": "https://schema.org",
+              "@type": "Service",
+              name: `Nạp ${game.custom_name || game.name}`,
+              description: `Dịch vụ nạp ${game.custom_name || game.name} tại LaviTopup với thao tác nhanh và hỗ trợ trực tiếp.`,
+              provider: {
+                  "@type": "Organization",
+                  name: "LaviTopup",
+                  url: siteUrl,
+              },
+              areaServed: "VN",
+              image: getImageSrc(game.poster || game.thumbnail),
+              url: `${siteUrl}/categories/topup/${gamecode}`,
+          }
+        : null;
 
     return (
         <>

@@ -1,49 +1,17 @@
 import HomeClient from "./components/HomeClient";
 
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://lavitopup.io.vn";
+
 export const metadata = {
-    title: "LaviTopup - Nạp game nhanh",
+    title: "Trang chủ phụ",
     description:
-        "Nạp game nhanh chóng với giao diện rõ ràng, dễ dùng. Chọn game, nhập thông tin và thanh toán chỉ trong vài bước.",
-    keywords: [
-        "lavitopup",
-        "nạp game",
-        "nạp game tiện lợi",
-        "nạp game nhanh",
-        "topup game",
-        "mua tài khoản game",
-    ],
-    authors: [{ name: "LaviTopup" }],
-    creator: "LaviTopup",
-    publisher: "LaviTopup",
-    metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://lavitopup.vn"),
+        "Đường dẫn phụ của trang chủ LaviTopup. Nội dung chính được chuẩn hóa về trang chủ gốc.",
+    metadataBase: new URL(siteUrl),
     alternates: {
         canonical: "/",
     },
-    openGraph: {
-        title: "LaviTopup - Nạp game nhanh",
-        description: "Chọn game, nhập thông tin và thanh toán trên giao diện rõ ràng, dễ dùng.",
-        url: "/",
-        siteName: "LaviTopup",
-        images: [
-            {
-                url: "/banner/4e4234e67024d97d7eff34daf88b8448.png",
-                width: 1536,
-                height: 864,
-                alt: "LaviTopup - Nạp game nhanh",
-                type: "image/png",
-            },
-        ],
-        locale: "vi_VN",
-        type: "website",
-    },
-    twitter: {
-        card: "summary_large_image",
-        title: "LaviTopup - Nạp game nhanh",
-        description: "Trang chủ nạp game rõ ràng, dễ tìm game và dễ thao tác.",
-        images: ["/banner/4e4234e67024d97d7eff34daf88b8448.png"],
-    },
     robots: {
-        index: true,
+        index: false,
         follow: true,
     },
 };
@@ -53,17 +21,17 @@ const webSiteJsonLd = {
     "@type": "WebSite",
     name: "LaviTopup",
     alternateName: ["Lavi Topup"],
-    url: process.env.NEXT_PUBLIC_APP_URL || "https://lavitopup.vn",
-    description: "Trang nạp game rõ ràng, dễ tìm game, dễ thao tác và dễ liên hệ hỗ trợ.",
+    url: siteUrl,
+    description: "Topup và tài khoản game với giao diện rõ ràng, thao tác nhanh và hỗ trợ trực tiếp.",
 };
 
 const orgJsonLd = {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: "LaviTopup",
-    url: process.env.NEXT_PUBLIC_APP_URL || "https://lavitopup.vn",
-    logo: `${process.env.NEXT_PUBLIC_APP_URL || "https://lavitopup.vn"}/imgs/removed_bg.png`,
-    sameAs: [],
+    url: siteUrl,
+    logo: `${siteUrl}/imgs/removed_bg.png`,
+    sameAs: ["https://www.facebook.com/messages/e2ee/t/1484722313227044"],
 };
 
 export default function HomePage() {
