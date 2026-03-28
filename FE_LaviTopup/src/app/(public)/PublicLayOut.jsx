@@ -24,10 +24,10 @@ export default function PublicLayout({ children }) {
                     target="_blank"
                     rel="noopener noreferrer"
                     className="glass-panel flex items-center gap-2 rounded-full px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-1"
-                    title="FB LaviTopup"
+                    title="Messenger LaviTopup"
                 >
                     <FaFacebookF className="text-[#ff8456]" />
-                    <span>FB</span>
+                    <span>Messenger</span>
                 </a>
             </div>
         </div>

@@ -11,8 +11,8 @@ import HeroSection from "./HeroSection";
 
 const supportLinks = [
     {
-        title: "FB",
-        description: "Li?n h? tr?c ti?p ?? ki?m tra ??n h?ng ho?c nh?n h? tr? nhanh.",
+        title: "Messenger",
+        description: "Liên hệ trực tiếp để kiểm tra đơn hàng hoặc nhận hỗ trợ nhanh.",
         href: "https://www.facebook.com/messages/e2ee/t/1484722313227044",
         icon: FaFacebookF,
         iconWrapper: "bg-[#ff8456]/12 text-[#ff8456]",

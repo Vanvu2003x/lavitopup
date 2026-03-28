@@ -109,7 +109,7 @@ export default function ItemsPkg({ pkg }) {
                                 } ${statusLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                         >
                             <option value="active">Đang hoạt động</option>
-                            <option value="inactive">Tạm ngưng</option>
+                            <option value="inactive">Không hoạt động</option>
                         </select>
 
                         {/* Nút hành động */}

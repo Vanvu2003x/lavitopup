@@ -538,7 +538,7 @@ export default function TopUpPackageManagerPage() {
                                     </span>
                                 ) : (
                                     <span className="px-2 py-0.5 rounded-md bg-gray-100 text-gray-600 text-xs font-bold border border-gray-200 backdrop-blur-md">
-                                        Tạm ẩn
+                                        Không HĐ
                                     </span>
                                 )}
                                 {pkg.sale && (
@@ -765,7 +765,9 @@ export default function TopUpPackageManagerPage() {
                                         >
                                             <div className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform ${formData.status === 'active' ? 'translate-x-6' : 'translate-x-0'}`}></div>
                                         </div>
-                                        <span className="text-gray-700 group-hover:text-gray-900 transition-colors">Đang hoạt động</span>
+                                        <span className="text-gray-700 group-hover:text-gray-900 transition-colors">
+                                            {formData.status === 'active' ? 'Đang hoạt động' : 'Không hoạt động'}
+                                        </span>
                                     </label>
 
                                     {/* Sale */}
