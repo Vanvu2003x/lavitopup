@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import {
@@ -219,12 +219,12 @@ export default function PaymentWallet({ onClose, onPaymentSuccess }) {
                                 },
                                 {
                                     label: "Số tài khoản",
-                                    value: qrData.accountNumber || "---",
+                                    value: qrData.accountNumber || "0989214946",
                                     canCopy: true,
                                 },
                                 {
                                     label: "Chủ tài khoản",
-                                    value: qrData.accountHolder || qrData.accountName || "Vu DINH VAN",
+                                    value: qrData.accountHolder || qrData.accountName || "LUU VAN QUANG",
                                     canCopy: false,
                                 },
                                 {

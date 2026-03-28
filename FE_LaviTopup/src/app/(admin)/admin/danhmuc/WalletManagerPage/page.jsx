@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import {
@@ -14,6 +14,8 @@ import { toast } from "react-toastify";
 
 import Pagination from "@/components/common/Pagination";
 import { getListLogs, manualChargeBalance } from "@/services/toup-wallet-logs.service";
+
+const AUTO_REFRESH_MS = 10000;
 
 const FILTERS = [
     { id: "all", label: "Tất cả", icon: FiCreditCard },
@@ -128,6 +130,17 @@ export default function WalletManagerPage() {
             console.error("Lỗi lấy thống kê nạp ví:", error);
         });
     }, []);
+
+    useEffect(() => {
+        const intervalId = setInterval(() => {
+            fetchTransactions({ silent: true });
+            fetchSummary().catch((error) => {
+                console.error("Lỗi auto refresh thống kê nạp ví:", error);
+            });
+        }, AUTO_REFRESH_MS);
+
+        return () => clearInterval(intervalId);
+    }, [currentPage, searchTerm, activeFilter]);
 
     const handleSearchSubmit = (event) => {
         event.preventDefault();

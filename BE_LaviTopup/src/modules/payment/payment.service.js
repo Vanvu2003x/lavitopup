@@ -1,4 +1,4 @@
-﻿const { db } = require("../../configs/drizzle");
+const { db } = require("../../configs/drizzle");
 const { walletLogs } = require("../../db/schema");
 const { eq, inArray } = require("drizzle-orm");
 const crypto = require("crypto");
@@ -45,8 +45,8 @@ const PaymentService = {
 
         const bankBin = "970422";
         const bankName = "MBBank";
-        const stk = "0963575203";
-        const chusohuu = "Vu DINH VAN";
+        const stk = "0989214946";
+        const chusohuu = "LUU VAN QUANG";
 
         const log = await addLogDirect({ user_id: user.id, amount });
         const rawId = log.id.toString().replace(/[^a-zA-Z0-9]/g, "");
