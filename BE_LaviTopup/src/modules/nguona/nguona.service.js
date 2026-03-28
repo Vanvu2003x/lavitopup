@@ -12,7 +12,6 @@ const PARTNER_CATALOG_BASE_URL = (
     PARTNER_BASE_URL.replace(/\/partner$/, "")
 ).replace(/\/+$/, "");
 const PARTNER_API_KEY = process.env.PARTNER_API_KEY || process.env.NGUONA_API_KEY;
-const PARTNER_PRICE_RATE = Number(process.env.PARTNER_PRICE_RATE || process.env.PARTNER_PRICE_MULTIPLIER || 26000);
 const SOURCE_CODE = "partner";
 
 const sanitizeApiId = (value) => String(value ?? "").trim().substring(0, 100);
@@ -40,7 +39,7 @@ const resolveNumber = (value, fallback = 0) => {
     return toNumber(value, toNumber(fallback, 0));
 };
 
-const buildApiPrice = (remotePrice) => Math.ceil(toNumber(remotePrice, 0) * PARTNER_PRICE_RATE);
+const buildApiPrice = (remotePrice) => Math.ceil(toNumber(remotePrice, 0));
 
 const resolveRemotePackagePrice = (remotePackage = {}) =>
     remotePackage?.originalPrice ??
