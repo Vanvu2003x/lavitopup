@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 import { FaFacebookF } from "react-icons/fa";
 
@@ -19,7 +19,7 @@ export default function Footer() {
                     </Link>
 
                     <p className="mt-4 max-w-lg text-sm leading-7 text-[#9fb5da]">
-                        Náº¡p game nhanh, thao tÃ¡c gá»n vÃ  dá»… theo dÃµi trÃªn cáº£ Ä‘iá»‡n thoáº¡i láº«n mÃ¡y tÃ­nh.
+                        Nạp game nhanh, thao tác gọn và dễ theo dõi trên cả điện thoại lẫn máy tính.
                     </p>
 
                     <div className="mt-5 flex flex-wrap gap-3">
@@ -36,27 +36,26 @@ export default function Footer() {
                 </div>
 
                 <div>
-                    <h3 className="text-sm font-bold uppercase tracking-[0.22em] text-white">Äi nhanh</h3>
+                    <h3 className="text-sm font-bold uppercase tracking-[0.22em] text-white">Đi nhanh</h3>
                     <div className="mt-4 space-y-3 text-sm">
                         <Link href="/" className="block text-[#a9bddf] transition hover:text-white">
-                            Trang chá»§
+                            Trang chủ
                         </Link>
                         <Link href="/#danh-muc-game" className="block text-[#a9bddf] transition hover:text-white">
-                            Danh sÃ¡ch game
+                            Danh sách game
                         </Link>
                         <Link href="/account" className="block text-[#a9bddf] transition hover:text-white">
-                            TÃ i khoáº£n
+                            Tài khoản
                         </Link>
-
                     </div>
                 </div>
 
                 <div>
-                    <h3 className="text-sm font-bold uppercase tracking-[0.22em] text-white">Há»— trá»£</h3>
+                    <h3 className="text-sm font-bold uppercase tracking-[0.22em] text-white">Hỗ trợ</h3>
                     <div id="ho-tro" className="surface-card mt-4 scroll-mt-28 rounded-[1.6rem] p-5">
-                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#53e5c6]">Há»— trá»£ 24/7</p>
+                        <p className="text-xs font-bold uppercase tracking-[0.18em] text-[#53e5c6]">Hỗ trợ 24/7</p>
                         <p className="mt-2 text-sm leading-6 text-[#9fb5da]">
-                            Cáº§n kiá»ƒm tra Ä‘Æ¡n hÃ ng hoáº·c thÃ´ng tin náº¡p, báº¡n cÃ³ thá»ƒ liÃªn há»‡ ngay qua Messenger.
+                            Cần kiểm tra đơn hàng hoặc thông tin nạp, bạn có thể liên hệ ngay qua Messenger.
                         </p>
                         <a
                             href="https://www.facebook.com/messages/e2ee/t/1484722313227044"
@@ -64,7 +63,7 @@ export default function Footer() {
                             rel="noopener noreferrer"
                             className="mt-4 inline-flex rounded-full bg-[#ff8456] px-4 py-2 text-sm font-bold text-[#08111f] transition hover:bg-[#ff976f]"
                         >
-                            LiÃªn há»‡ ngay
+                            Liên hệ ngay
                         </a>
                     </div>
                 </div>
@@ -73,14 +72,14 @@ export default function Footer() {
             <div className="relative border-t border-white/10">
                 <div className="mx-auto flex max-w-[1320px] flex-col items-center justify-between gap-3 px-4 py-4 text-xs text-[#8fa7cf] sm:flex-row sm:px-6">
                     <p>
-                        Â© {year} <span className="font-bold text-white">LaviTopup</span>. Náº¡p game nhanh vÃ  rÃµ rÃ ng hÆ¡n.
+                        © {year} <span className="font-bold text-white">LaviTopup</span>. Nạp game nhanh và rõ ràng hơn.
                     </p>
                     <div className="flex items-center gap-5">
                         <Link href="#" className="transition hover:text-white">
-                            Äiá»u khoáº£n
+                            Điều khoản
                         </Link>
                         <Link href="#" className="transition hover:text-white">
-                            Báº£o máº­t
+                            Bảo mật
                         </Link>
                     </div>
                 </div>
