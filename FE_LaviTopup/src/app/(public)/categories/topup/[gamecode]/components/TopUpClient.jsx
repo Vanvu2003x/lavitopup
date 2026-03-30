@@ -17,6 +17,133 @@ import PaymentMethodGrid, { walletPaymentMethod } from "./PaymentMethodGrid";
 import StickyBottomBar from "./StickyBottomBar";
 import TopUpForm from "./TopUpForm";
 
+const LOGIN_FIELD_NAMES = ["username", "account", "password", "pass"];
+const UID_FIELD_NAMES = ["userid", "user_id", "uid", "id", "openid", "playerid", "player_id"];
+const PHONE_FIELD_NAMES = ["phone", "sdt", "zalo", "zalonumber", "zalo_number"];
+const NOTE_FIELD_NAMES = ["note", "ghichu", "ghi_chu"];
+
+const normalizeFieldName = (value = "") => String(value || "").trim().toLowerCase();
+const isLoginField = (name) => LOGIN_FIELD_NAMES.includes(normalizeFieldName(name));
+const isUidField = (name) => UID_FIELD_NAMES.includes(normalizeFieldName(name));
+const isPhoneField = (name) => PHONE_FIELD_NAMES.includes(normalizeFieldName(name));
+const isNoteField = (name) => NOTE_FIELD_NAMES.includes(normalizeFieldName(name));
+
+const shouldShowPartnerField = (name, rechargeMethod) => {
+    const normalized = normalizeFieldName(name);
+
+    if (isNoteField(normalized)) return false;
+    if (rechargeMethod === "uid" && isLoginField(normalized)) return false;
+    if (rechargeMethod === "login" && isUidField(normalized)) return false;
+
+    return true;
+};
+
+const resolveMappedFieldValue = (name, values) => {
+    const normalized = normalizeFieldName(name);
+
+    if (normalized === "password" || normalized === "pass") return values.password;
+    if (normalized === "username" || normalized === "account") return values.username;
+    if (isUidField(normalized)) return values.uid;
+    if (isPhoneField(normalized)) return values.zaloNumber;
+    if (isNoteField(normalized)) return values.note;
+    if (normalized.includes("server") || normalized.includes("zone") || normalized.includes("role")) {
+        return values.idServer || values.server;
+    }
+
+    return values.extraFields?.[normalized] || "";
+};
+
+const buildPartnerAccountInfo = ({ game, rechargeMethod, uid, username, password, server, idServer, zaloNumber, note, extraFields }) => {
+    const inputFields = Array.isArray(game?.input_fields) ? game.input_fields : [];
+    const visibleFields = inputFields.filter((field) => shouldShowPartnerField(field?.name, rechargeMethod));
+
+    if (!visibleFields.length) {
+        const fallback = {
+            uid,
+            server,
+            id_server: idServer,
+            note: note || "",
+        };
+
+        if (username) fallback.username = username;
+        if (password) fallback.password = password;
+        if (zaloNumber) {
+            fallback.zaloNumber = zaloNumber;
+            fallback.phone = zaloNumber;
+        }
+
+        return fallback;
+    }
+
+    const accountInfo = {};
+
+    visibleFields.forEach((field) => {
+        const value = resolveMappedFieldValue(field?.name, {
+            uid,
+            username,
+            password,
+            server,
+            idServer,
+            zaloNumber,
+            note,
+            extraFields,
+        });
+
+        if (value !== undefined && value !== null && String(value).trim() !== "") {
+            accountInfo[field.name] = value;
+        }
+    });
+
+    if (zaloNumber && !Object.keys(accountInfo).some((key) => isPhoneField(key))) {
+        accountInfo.zaloNumber = zaloNumber;
+        accountInfo.phone = zaloNumber;
+    }
+
+    if (note && !Object.keys(accountInfo).some((key) => isNoteField(key))) {
+        accountInfo.note = note;
+    }
+
+    return accountInfo;
+};
+
+const validatePartnerFields = ({ game, rechargeMethod, uid, username, password, server, idServer, zaloNumber, note, extraFields }) => {
+    const inputFields = Array.isArray(game?.input_fields) ? game.input_fields : [];
+    const visibleFields = inputFields.filter((field) => shouldShowPartnerField(field?.name, rechargeMethod));
+
+    for (const field of visibleFields) {
+        if (!field?.required) {
+            continue;
+        }
+
+        const value = resolveMappedFieldValue(field?.name, {
+            uid,
+            username,
+            password,
+            server,
+            idServer,
+            zaloNumber,
+            note,
+            extraFields,
+        });
+
+        if (value === undefined || value === null || String(value).trim() === "") {
+            return field?.label || field?.name || "thÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â´ng tin bÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂºÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯t buÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢c";
+        }
+    }
+
+    return null;
+};
+
+const pickPrimaryValue = (accountInfo, candidates = []) => {
+    for (const key of candidates) {
+        const value = accountInfo?.[key];
+        if (value !== undefined && value !== null && String(value).trim() !== "") {
+            return value;
+        }
+    }
+
+    return "";
+};
 export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGames = [] }) {
     const toast = useToast();
     const router = useRouter();
@@ -39,6 +166,7 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
     const [password, setPassword] = useState("");
     const [zaloNumber, setZaloNumber] = useState("");
     const [note, setNote] = useState("");
+    const [extraFields, setExtraFields] = useState({});
     const [confirmForm, setConfirmForm] = useState(false);
 
     const selectedPaymentMethod = walletPaymentMethod;
@@ -49,6 +177,35 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
         if (game?.server?.length > 0) {
             setServer(game.server[0]);
         }
+
+        const inputFields = Array.isArray(game?.input_fields) ? game.input_fields : [];
+        const nextExtraFields = {};
+        let nextIdServer = "";
+
+        inputFields.forEach((field) => {
+            const normalized = normalizeFieldName(field?.name);
+            const options = Array.isArray(field?.options) ? field.options : [];
+            const firstOptionValue = options[0]?.value || "";
+
+            if (!firstOptionValue) {
+                return;
+            }
+
+            if (normalized.includes("server") || normalized.includes("zone") || normalized.includes("role")) {
+                nextIdServer = firstOptionValue;
+                return;
+            }
+
+            if (!isUidField(normalized) && !isLoginField(normalized) && !isPhoneField(normalized) && !isNoteField(normalized)) {
+                nextExtraFields[normalized] = firstOptionValue;
+            }
+        });
+
+        if (nextIdServer) {
+            setIdServer(nextIdServer);
+        }
+
+        setExtraFields(nextExtraFields);
     }, [game]);
 
     useEffect(() => {
@@ -84,21 +241,57 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
             return;
         }
 
-        if (rechargeMethod === "uid") {
-            if (!uid) return toast.warn("Vui long nhap UID.");
-            if (game?.server?.length > 1 && !selectedPkg?.id_server && !server) return toast.warn("Vui long chon may chu.");
-            if ((game?.server?.length === 0 || selectedPkg?.id_server) && !idServer) return toast.warn("Vui long nhap server.");
-        } else {
-            if (!username || !password) return toast.warn("Vui long nhap tai khoan va mat khau.");
-            if (!zaloNumber) return toast.warn("Vui long nhap so Zalo.");
-            if (game?.server?.length > 1 && !selectedPkg?.id_server && !server) return toast.warn("Vui long chon may chu.");
-            if ((game?.server?.length === 0 || selectedPkg?.id_server) && !idServer) return toast.warn("Vui long nhap server.");
+        const missingField = validatePartnerFields({
+            game,
+            rechargeMethod,
+            uid,
+            username,
+            password,
+            server,
+            idServer,
+            zaloNumber,
+            note,
+            extraFields,
+        });
+
+        if (missingField) {
+            toast.warn(`Vui long nhap ${missingField}.`);
+            return;
+        }
+
+        if (!Array.isArray(game?.input_fields) || game.input_fields.length === 0) {
+            if (rechargeMethod === "uid") {
+                if (!uid) return toast.warn("Vui long nhap UID.");
+                if (game?.server?.length > 1 && !selectedPkg?.id_server && !server) return toast.warn("Vui long chon may chu.");
+                if ((game?.server?.length === 0 || selectedPkg?.id_server) && !idServer) return toast.warn("Vui long nhap server.");
+            } else {
+                if (!username || !password) return toast.warn("Vui long nhap tai khoan va mat khau.");
+                if (!zaloNumber) return toast.warn("Vui long nhap so Zalo.");
+                if (game?.server?.length > 1 && !selectedPkg?.id_server && !server) return toast.warn("Vui long chon may chu.");
+                if ((game?.server?.length === 0 || selectedPkg?.id_server) && !idServer) return toast.warn("Vui long nhap server.");
+            }
         }
 
         setConfirmForm(true);
     };
 
     const canCheckout = Boolean(selectedPkg);
+    const builtAccountInfo = buildPartnerAccountInfo({
+        game,
+        rechargeMethod,
+        uid,
+        username,
+        password,
+        server,
+        idServer,
+        zaloNumber,
+        note,
+        extraFields,
+    });
+    const summaryUid = pickPrimaryValue(builtAccountInfo, ["uid", "userId", "userid", "id", "openid", "playerId", "player_id"]);
+    const summaryUsername = pickPrimaryValue(builtAccountInfo, ["username", "account"]);
+    const summaryServer = pickPrimaryValue(builtAccountInfo, ["server", "serverId", "server_id"]);
+    const summaryIdServer = pickPrimaryValue(builtAccountInfo, ["idserver", "idServer", "id_server", "zoneId", "zoneid", "zone_id", "role_id"]);
 
     return (
         <div className="relative min-h-screen bg-[#06101f] text-white">
@@ -115,9 +308,9 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
                         <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(3,8,20,0.92)_0%,rgba(3,8,20,0.72)_42%,rgba(3,8,20,0.38)_100%)]" />
                         <div className="relative z-10 flex min-h-[300px] flex-col justify-between p-5 sm:p-7">
                             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#9ab6df]">
-                                <a href="/" className="transition hover:text-white">Trang chủ</a>
+                                <a href="/" className="transition hover:text-white">Trang chÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§</a>
                                 <span>/</span>
-                                <span>Nạp game</span>
+                                <span>NÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂºÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡p game</span>
                                 <span>/</span>
                                 <span className="text-[#5eead4]">{game?.name || "Game"}</span>
                             </div>
@@ -126,9 +319,9 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
                                 <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }} className="max-w-2xl">
                                     <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-200">
                                         <FiZap className="h-3.5 w-3.5" />
-                                        Xử lý tự động
+                                        XÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­ lÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½ tÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â± ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¾ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¾ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ng
                                     </div>
-                                    <h1 className="text-3xl font-bold tracking-[-0.04em] text-white sm:text-4xl">Nạp {game?.name}</h1>
+                                    <h1 className="text-3xl font-bold tracking-[-0.04em] text-white sm:text-4xl">NÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂºÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡p {game?.name}</h1>
                                 </motion.div>
 
                                 {allTopUpGames.length > 0 ? (
@@ -139,7 +332,7 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
                                             className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/[0.1] sm:px-4 sm:py-2.5 sm:text-sm"
                                         >
                                             <HiSwitchHorizontal size={14} className="sm:h-4 sm:w-4" />
-                                            Đổi game
+                                            ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¾ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢i game
                                         </button>
 
                                         {showGameDropdown ? (
@@ -173,12 +366,12 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
                                 <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/25 px-3 py-2 text-sm text-white">
                                     <img src={thumbnailSrc} alt={game?.name || "Game"} className="h-9 w-9 rounded-full object-cover" />
                                     <div className="text-left">
-                                        <p className="text-[11px] uppercase tracking-[0.18em] text-[#9ab6df]">Poster đang hiển thị</p>
+                                        <p className="text-[11px] uppercase tracking-[0.18em] text-[#9ab6df]">Poster ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¾ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œang hiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢n thÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¹</p>
                                         <p className="font-semibold">{game?.publisher || "Topup24h"}</p>
                                     </div>
                                 </div>
                                 <div className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#9ab6df]">
-                                    Nhập thông tin {"->"} Chọn gói {"->"} Thanh toán
+                                    NhÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂºÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­p thÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â´ng tin {"->"} ChÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Ân gÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³i {"->"} Thanh toÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡n
                                 </div>
                             </motion.div>
                         </div>
@@ -205,6 +398,8 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
                                 setZaloNumber={setZaloNumber}
                                 note={note}
                                 setNote={setNote}
+                                extraFields={extraFields}
+                                setExtraFields={setExtraFields}
                                 game={game}
                                 selectedPkg={selectedPkg}
                                 availableMethods={availableMethods}
@@ -258,13 +453,14 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
                     data={{
                         package: selectedPkg,
                         paymentMethod: selectedPaymentMethod,
-                        server: server || idServer,
-                        uid,
-                        username,
+                        server: summaryServer || summaryIdServer,
+                        uid: summaryUid,
+                        username: summaryUsername,
                         password,
-                        idServer: idServer || "",
-                        zaloNumber: zaloNumber || "N/A",
-                        note: note || "",
+                        idServer: summaryIdServer || "",
+                        zaloNumber: zaloNumber || builtAccountInfo.phone || builtAccountInfo.zaloNumber || "N/A",
+                        note: note || builtAccountInfo.note || "",
+                        accountInfo: builtAccountInfo,
                     }}
                     onClick={() => setConfirmForm(false)}
                 />

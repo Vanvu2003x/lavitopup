@@ -41,8 +41,8 @@ export default function ConfirmForm({ data, onClick }) {
                     </div>
 
                     <div className="px-8 pt-12 pb-8 text-center">
-                        <h2 className="text-2xl font-black text-gray-900 mb-1">Thanh toÃ¡n thÃ nh cÃ´ng!</h2>
-                        <p className="text-gray-500 font-medium text-sm">ÄÆ¡n hÃ ng Ä‘ang Ä‘Æ°á»£c xá»­ lÃ½</p>
+                        <h2 className="text-2xl font-black text-gray-900 mb-1">Thanh toÃƒÂ¡n thÃƒÂ nh cÃƒÂ´ng!</h2>
+                        <p className="text-gray-500 font-medium text-sm">Ã„ÂÃ†Â¡n hÃƒÂ ng Ã„â€˜ang Ã„â€˜Ã†Â°Ã¡Â»Â£c xÃ¡Â»Â­ lÃƒÂ½</p>
 
                         <div className="my-8 relative">
                             {/* Dotted Line */}
@@ -52,15 +52,15 @@ export default function ConfirmForm({ data, onClick }) {
                         {/* Order Details */}
                         <div className="bg-gray-50 rounded-2xl p-6 space-y-4 text-left">
                             <div className="flex justify-between items-start">
-                                <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mt-1">GÃ³i náº¡p</span>
+                                <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mt-1">GÃƒÂ³i nÃ¡ÂºÂ¡p</span>
                                 <span className="text-gray-900 font-bold text-right flex-1 pl-4 leading-tight">{data.package.package_name}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">GiÃ¡ tiá»n</span>
+                                <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">GiÃƒÂ¡ tiÃ¡Â»Ân</span>
                                 <span className="text-emerald-600 font-black text-lg">{formatPrice(data.package.price)}</span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">TÃ i khoáº£n</span>
+                                <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">TÃƒÂ i khoÃ¡ÂºÂ£n</span>
                                 <span className="text-gray-700 font-medium text-sm font-mono truncate max-w-[150px]">{data.uid || data.username}</span>
                             </div>
                         </div>
@@ -68,7 +68,7 @@ export default function ConfirmForm({ data, onClick }) {
                         {/* Footer Info */}
                         <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-400">
                             <FiClock />
-                            <span>Dá»± kiáº¿n hoÃ n thÃ nh: 1-5 phÃºt</span>
+                            <span>DÃ¡Â»Â± kiÃ¡ÂºÂ¿n hoÃƒÂ n thÃƒÂ nh: 1-5 phÃƒÂºt</span>
                         </div>
 
                         {/* Buttons */}
@@ -77,14 +77,14 @@ export default function ConfirmForm({ data, onClick }) {
                                 href="/account"
                                 className="w-full py-4 bg-gray-900 hover:bg-black text-white font-bold rounded-xl shadow-lg transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2"
                             >
-                                <FiUser /> Quáº£n lÃ½ Ä‘Æ¡n hÃ ng
+                                <FiUser /> QuÃ¡ÂºÂ£n lÃƒÂ½ Ã„â€˜Ã†Â¡n hÃƒÂ ng
                             </Link>
 
                             <button
                                 onClick={onClick}
                                 className="block w-full py-3 text-gray-500 font-bold hover:text-gray-700 transition-colors text-sm"
                             >
-                                ÄÃ³ng cá»­a sá»•
+                                Ã„ÂÃƒÂ³ng cÃ¡Â»Â­a sÃ¡Â»â€¢
                             </button>
                         </div>
                     </div>
@@ -124,7 +124,7 @@ export default function ConfirmForm({ data, onClick }) {
                 <div className="p-6 pb-2 relative z-10">
                     <div className="flex justify-between items-start mb-4">
                         <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                            <FiShield className="text-purple-500" /> XÃ¡c nháº­n thanh toÃ¡n
+                            <FiShield className="text-purple-500" /> XÃƒÂ¡c nhÃ¡ÂºÂ­n thanh toÃƒÂ¡n
                         </h2>
                         <button
                             onClick={onClick}
@@ -145,14 +145,14 @@ export default function ConfirmForm({ data, onClick }) {
                             <FiPackage size={24} />
                         </div>
                         <div className="flex-1 min-w-0">
-                            <div className="text-xs text-slate-500 font-bold uppercase mb-0.5">GÃ³i náº¡p</div>
+                            <div className="text-xs text-slate-500 font-bold uppercase mb-0.5">GÃƒÂ³i nÃ¡ÂºÂ¡p</div>
                             <div className="text-white font-bold truncate">{data.package.package_name}</div>
                             <div className="text-xs text-blue-400 font-medium bg-blue-500/10 px-1.5 py-0.5 rounded inline-block mt-1">
                                 {data.package.package_type}
                             </div>
                         </div>
                         <div className="text-right">
-                            <div className="text-xs text-slate-500 font-bold uppercase mb-0.5">GiÃ¡ tiá»n</div>
+                            <div className="text-xs text-slate-500 font-bold uppercase mb-0.5">GiÃƒÂ¡ tiÃ¡Â»Ân</div>
                             <div className="text-green-400 font-bold text-lg">
                                 {formatPrice(data.package.price)}
                             </div>
@@ -172,7 +172,7 @@ export default function ConfirmForm({ data, onClick }) {
                         {data.paymentMethod && (
                             <div className="flex justify-between items-center py-2 border-b border-white/5">
                                 <span className="text-slate-400 text-sm flex items-center gap-2">
-                                    <FiShield className="text-slate-600" /> Thanh toÃ¡n
+                                    <FiShield className="text-slate-600" /> Thanh toÃƒÂ¡n
                                 </span>
                                 <span className="text-white font-medium">{data.paymentMethod.label}</span>
                             </div>
@@ -187,7 +187,7 @@ export default function ConfirmForm({ data, onClick }) {
                         )}
                         <div className="flex justify-between items-center py-2 border-b border-white/5">
                             <span className="text-slate-400 text-sm flex items-center gap-2">
-                                <FiUser className="text-slate-600" /> UID / TÃ i khoáº£n
+                                <FiUser className="text-slate-600" /> UID / TÃƒÂ i khoÃ¡ÂºÂ£n
                             </span>
                             <span className="text-white font-medium text-right max-w-[200px] truncate" title={data.uid || data.username}>
                                 {data.uid || data.username}
@@ -197,7 +197,7 @@ export default function ConfirmForm({ data, onClick }) {
                         {["LOG", "log"].includes(data.package.package_type) && data.password && (
                             <div className="flex justify-between items-center py-2 border-b border-white/5">
                                 <span className="text-slate-400 text-sm flex items-center gap-2">
-                                    <FiKey className="text-slate-600" /> Máº­t kháº©u
+                                    <FiKey className="text-slate-600" /> MÃ¡ÂºÂ­t khÃ¡ÂºÂ©u
                                 </span>
                                 <span className="text-white font-medium font-mono">******</span>
                             </div>
@@ -213,7 +213,7 @@ export default function ConfirmForm({ data, onClick }) {
                         {data.note && (
                             <div className="py-2">
                                 <span className="text-slate-400 text-sm flex items-center gap-2 mb-1">
-                                    <FiInfo className="text-slate-600" /> Ghi chÃº
+                                    <FiInfo className="text-slate-600" /> Ghi chÃƒÂº
                                 </span>
                                 <div className="text-slate-300 text-sm bg-white/5 p-2 rounded italic font-medium">
                                     "{data.note}"
@@ -226,7 +226,7 @@ export default function ConfirmForm({ data, onClick }) {
                     <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 flex gap-3">
                         <FiAlertTriangle className="text-yellow-500 shrink-0 mt-0.5" />
                         <p className="text-yellow-200 text-xs leading-relaxed">
-                            Vui lÃ²ng kiá»ƒm tra ká»¹ thÃ´ng tin. ÄÆ¡n hÃ ng sáº½ khÃ´ng thá»ƒ hoÃ n tiá»n náº¿u báº¡n Ä‘iá»n sai thÃ´ng tin nhÃ¢n váº­t.
+                            Vui lÃƒÂ²ng kiÃ¡Â»Æ’m tra kÃ¡Â»Â¹ thÃƒÂ´ng tin. Ã„ÂÃ†Â¡n hÃƒÂ ng sÃ¡ÂºÂ½ khÃƒÂ´ng thÃ¡Â»Æ’ hoÃƒÂ n tiÃ¡Â»Ân nÃ¡ÂºÂ¿u bÃ¡ÂºÂ¡n Ã„â€˜iÃ¡Â»Ân sai thÃƒÂ´ng tin nhÃƒÂ¢n vÃ¡ÂºÂ­t.
                         </p>
                     </div>
                 </div>
@@ -238,7 +238,7 @@ export default function ConfirmForm({ data, onClick }) {
                         disabled={isSubmitting}
                         className="flex-1 py-3 bg-[#1E1730] hover:bg-[#281f3d] text-slate-300 font-bold rounded-xl transition-all border border-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Quay láº¡i
+                        Quay lÃ¡ÂºÂ¡i
                     </button>
 
                     <button
@@ -272,7 +272,7 @@ export default function ConfirmForm({ data, onClick }) {
 
                                 connectSocket(localStorage.getItem("token"));
                             } catch (error) {
-                                const message = error?.response?.data?.message || "Táº¡o Ä‘Æ¡n hÃ ng tháº¥t báº¡i!";
+                                const message = error?.response?.data?.message || "TÃ¡ÂºÂ¡o Ã„â€˜Ã†Â¡n hÃƒÂ ng thÃ¡ÂºÂ¥t bÃ¡ÂºÂ¡i!";
                                 toast.error(message);
                                 setIsSubmitting(false);
                             }
@@ -282,11 +282,11 @@ export default function ConfirmForm({ data, onClick }) {
                         {isSubmitting ? (
                             <>
                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                <span>Äang xá»­ lÃ½...</span>
+                                <span>Ã„Âang xÃ¡Â»Â­ lÃƒÂ½...</span>
                             </>
                         ) : (
                             <>
-                                <FiCheck strokeWidth={3} /> XÃ¡c thá»±c & Náº¡p
+                                <FiCheck strokeWidth={3} /> XÃƒÂ¡c thÃ¡Â»Â±c & NÃ¡ÂºÂ¡p
                             </>
                         )}
                     </button>

@@ -66,11 +66,37 @@ const normalizeInputFields = (inputFields) => {
                 return null;
             }
 
+            const options = Array.isArray(field?.options)
+                ? field.options
+                    .map((option) => {
+                        if (option === undefined || option === null) {
+                            return null;
+                        }
+
+                        if (typeof option === "string") {
+                            const value = option.trim();
+                            return value ? { label: value, value } : null;
+                        }
+
+                        const value = String(option?.value ?? "").trim();
+                        if (!value) {
+                            return null;
+                        }
+
+                        return {
+                            label: String(option?.label ?? value).trim() || value,
+                            value,
+                        };
+                    })
+                    .filter(Boolean)
+                : [];
+
             return {
                 name,
                 label: field?.label || name,
                 type: field?.type || "text",
                 required: Boolean(field?.required),
+                ...(options.length > 0 ? { options } : {}),
             };
         })
         .filter(Boolean);
