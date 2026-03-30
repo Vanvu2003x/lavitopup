@@ -1,263 +1,346 @@
 "use client";
 
-import { createOrder } from "@/services/order.service";
+import React from "react";
+import Link from "next/link";
+import {
+    FiAlertTriangle,
+    FiArrowRight,
+    FiCheck,
+    FiClock,
+    FiInfo,
+    FiKey,
+    FiMessageSquare,
+    FiPackage,
+    FiServer,
+    FiShield,
+    FiUser,
+    FiX,
+} from "react-icons/fi";
+
 import { useToast } from "@/components/ui/Toast";
+import { createOrder } from "@/services/order.service";
 import { connectSocket } from "@/services/websocket.service";
-import { FiAlertTriangle, FiCheck, FiClock, FiGlobe, FiInfo, FiKey, FiMessageSquare, FiPackage, FiServer, FiShield, FiUser, FiX, FiArrowRight } from "react-icons/fi";
-import React from 'react';
-import Link from 'next/link';
+
+const formatPrice = (price) => `${new Intl.NumberFormat("vi-VN").format(Number(price) || 0)} VNĐ`;
+
+const INTERNAL_KEYS = new Set(["payment_method", "payment_method_label"]);
+const PASSWORD_KEYS = new Set(["password", "pass"]);
+const NOTE_KEYS = new Set(["note", "ghichu", "ghi_chu"]);
+
+const humanizeKey = (key = "") => {
+    const normalized = String(key || "").trim().toLowerCase();
+    const labels = {
+        uid: "UID",
+        userid: "UID",
+        user_id: "UID",
+        userid2: "UID",
+        userId: "UID",
+        id: "ID",
+        username: "Tài khoản",
+        account: "Tài khoản",
+        password: "Mật khẩu",
+        pass: "Mật khẩu",
+        server: "Server",
+        serverid: "Server",
+        server_id: "Server",
+        zoneid: "Zone ID",
+        zone_id: "Zone ID",
+        idserver: "Server",
+        id_server: "Server",
+        role_id: "Role ID",
+        phone: "Số liên hệ",
+        zNumber: "Zalo",
+        zalo: "Zalo",
+        zalonumber: "Zalo",
+        zalo_number: "Zalo",
+        note: "Ghi chú",
+        openid: "Open ID",
+        playerid: "Player ID",
+        player_id: "Player ID",
+    };
+
+    if (labels[key]) return labels[key];
+    if (labels[normalized]) return labels[normalized];
+
+    return String(key || "")
+        .replace(/_/g, " ")
+        .replace(/([a-z])([A-Z])/g, "$1 $2")
+        .replace(/\s+/g, " ")
+        .trim()
+        .replace(/^./, (char) => char.toUpperCase());
+};
+
+const normalizeGroup = (key = "") => {
+    const normalized = String(key || "").trim().toLowerCase();
+
+    if (["uid", "userid", "user_id", "id", "openid", "playerid", "player_id"].includes(normalized)) return "uid";
+    if (["username", "account"].includes(normalized)) return "username";
+    if (["password", "pass"].includes(normalized)) return "password";
+    if (["server", "serverid", "server_id"].includes(normalized)) return "server";
+    if (["idserver", "id_server", "zoneid", "zone_id", "role_id"].includes(normalized)) return "server_detail";
+    if (["phone", "zalo", "zalonumber", "zalo_number"].includes(normalized)) return "phone";
+    if (NOTE_KEYS.has(normalized)) return "note";
+
+    return normalized;
+};
+
+const getVisibleRows = (data) => {
+    const rows = [];
+    const accountInfo = data.accountInfo || {};
+    const seen = new Set();
+
+    if (data.paymentMethod?.label) {
+        rows.push({
+            key: "payment-method",
+            label: "Thanh toán",
+            value: data.paymentMethod.label,
+            icon: FiShield,
+        });
+        seen.add("payment_method");
+    }
+
+    Object.entries(accountInfo).forEach(([key, value]) => {
+        if (INTERNAL_KEYS.has(key)) return;
+        if (value === undefined || value === null || String(value).trim() === "") return;
+
+        const group = normalizeGroup(key);
+        if (seen.has(group)) return;
+        seen.add(group);
+
+        rows.push({
+            key,
+            label: humanizeKey(key),
+            value: PASSWORD_KEYS.has(String(key).toLowerCase()) ? "••••••" : String(value),
+            icon:
+                PASSWORD_KEYS.has(String(key).toLowerCase())
+                    ? FiKey
+                    : group === "phone"
+                      ? FiMessageSquare
+                      : group === "server" || group === "server_detail"
+                        ? FiServer
+                        : FiUser,
+            isNote: group === "note",
+        });
+    });
+
+    if (!seen.has("uid") && (data.uid || data.username)) {
+        rows.push({
+            key: "account-fallback",
+            label: data.uid ? "UID" : "Tài khoản",
+            value: data.uid || data.username,
+            icon: FiUser,
+        });
+    }
+
+    if (!seen.has("server") && data.server) {
+        rows.push({
+            key: "server-fallback",
+            label: "Server",
+            value: data.server,
+            icon: FiServer,
+        });
+    }
+
+    if (!seen.has("server_detail") && data.idServer) {
+        rows.push({
+            key: "server-detail-fallback",
+            label: "Zone ID",
+            value: data.idServer,
+            icon: FiServer,
+        });
+    }
+
+    if (!seen.has("phone") && data.zaloNumber) {
+        rows.push({
+            key: "phone-fallback",
+            label: "Zalo",
+            value: data.zaloNumber,
+            icon: FiMessageSquare,
+        });
+    }
+
+    if (!seen.has("note") && data.note) {
+        rows.push({
+            key: "note-fallback",
+            label: "Ghi chú",
+            value: data.note,
+            icon: FiInfo,
+            isNote: true,
+        });
+    }
+
+    return rows;
+};
 
 export default function ConfirmForm({ data, onClick }) {
     const toast = useToast();
     const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [isSuccess, setIsSuccess] = React.useState(false);
-    const [orderResult, setOrderResult] = React.useState(null);
 
-    const formatPrice = (price) =>
-        new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-        }).format(price || 0);
+    const detailRows = React.useMemo(() => getVisibleRows(data), [data]);
 
-    // Success State UI - Redesigned
     if (isSuccess) {
         return (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-                {/* Backdrop */}
-                <div className="absolute inset-0 bg-black/90 backdrop-blur-md"></div>
+                <div className="absolute inset-0 bg-black/85 backdrop-blur-md" />
 
-                {/* Success Modal - Receipt Style */}
-                <div className="relative w-full max-w-sm bg-white rounded-3xl overflow-hidden shadow-2xl animate-scaleIn">
-                    {/* Header Pattern */}
-                    <div className="h-32 bg-emerald-500 relative flex items-center justify-center overflow-hidden">
-                        <div className="absolute inset-0 opacity-20">
-                            <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                                <path d="M0 100 C 20 0 50 0 100 100 Z" fill="white" />
-                            </svg>
-                        </div>
-                        <div className="relative z-10 w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg">
-                            <FiCheck className="text-emerald-500 text-4xl animate-bounceIn" strokeWidth={3} />
+                <div className="relative w-full max-w-sm overflow-hidden rounded-[2rem] border border-white/10 bg-white shadow-2xl">
+                    <div className="relative flex h-32 items-center justify-center overflow-hidden bg-emerald-500">
+                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.45),transparent_55%)]" />
+                        <div className="relative flex h-20 w-20 items-center justify-center rounded-full bg-white shadow-xl">
+                            <FiCheck className="text-4xl text-emerald-500" strokeWidth={3} />
                         </div>
                     </div>
 
-                    <div className="px-8 pt-12 pb-8 text-center">
-                        <h2 className="text-2xl font-black text-gray-900 mb-1">Thanh toÃƒÂ¡n thÃƒÂ nh cÃƒÂ´ng!</h2>
-                        <p className="text-gray-500 font-medium text-sm">Ã„ÂÃ†Â¡n hÃƒÂ ng Ã„â€˜ang Ã„â€˜Ã†Â°Ã¡Â»Â£c xÃ¡Â»Â­ lÃƒÂ½</p>
+                    <div className="px-7 pb-7 pt-6 text-center">
+                        <h2 className="text-2xl font-black text-slate-900">Tạo đơn thành công</h2>
+                        <p className="mt-2 text-sm text-slate-500">Đơn nạp đã được ghi nhận và đang chuyển sang bước xử lý.</p>
 
-                        <div className="my-8 relative">
-                            {/* Dotted Line */}
-                            <div className="absolute left-0 right-0 top-1/2 border-t-2 border-dashed border-gray-100"></div>
-                        </div>
-
-                        {/* Order Details */}
-                        <div className="bg-gray-50 rounded-2xl p-6 space-y-4 text-left">
-                            <div className="flex justify-between items-start">
-                                <span className="text-gray-400 text-xs font-bold uppercase tracking-wider mt-1">GÃƒÂ³i nÃ¡ÂºÂ¡p</span>
-                                <span className="text-gray-900 font-bold text-right flex-1 pl-4 leading-tight">{data.package.package_name}</span>
+                        <div className="mt-6 rounded-2xl bg-slate-50 p-5 text-left">
+                            <div className="flex items-start justify-between gap-3">
+                                <span className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Gói nạp</span>
+                                <span className="flex-1 text-right font-bold text-slate-900">{data.package.package_name}</span>
                             </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">GiÃƒÂ¡ tiÃ¡Â»Ân</span>
-                                <span className="text-emerald-600 font-black text-lg">{formatPrice(data.package.price)}</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">TÃƒÂ i khoÃ¡ÂºÂ£n</span>
-                                <span className="text-gray-700 font-medium text-sm font-mono truncate max-w-[150px]">{data.uid || data.username}</span>
+                            <div className="mt-3 flex items-center justify-between gap-3">
+                                <span className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Tổng tiền</span>
+                                <span className="text-lg font-black text-emerald-600">{formatPrice(data.package.price)}</span>
                             </div>
                         </div>
 
-                        {/* Footer Info */}
-                        <div className="mt-6 flex items-center justify-center gap-2 text-xs text-gray-400">
+                        <div className="mt-5 inline-flex items-center gap-2 text-xs text-slate-400">
                             <FiClock />
-                            <span>DÃ¡Â»Â± kiÃ¡ÂºÂ¿n hoÃƒÂ n thÃƒÂ nh: 1-5 phÃƒÂºt</span>
+                            <span>Thời gian xử lý thường từ 1 đến 5 phút.</span>
                         </div>
 
-                        {/* Buttons */}
-                        <div className="mt-8 space-y-3">
+                        <div className="mt-7 space-y-3">
                             <Link
                                 href="/account"
-                                className="w-full py-4 bg-gray-900 hover:bg-black text-white font-bold rounded-xl shadow-lg transition-all transform hover:-translate-y-1 flex items-center justify-center gap-2"
+                                className="flex w-full items-center justify-center gap-2 rounded-2xl bg-slate-900 px-4 py-3.5 font-bold text-white transition hover:bg-black"
                             >
-                                <FiUser /> QuÃ¡ÂºÂ£n lÃƒÂ½ Ã„â€˜Ã†Â¡n hÃƒÂ ng
+                                <FiUser />
+                                Xem đơn trong tài khoản
                             </Link>
 
                             <button
+                                type="button"
                                 onClick={onClick}
-                                className="block w-full py-3 text-gray-500 font-bold hover:text-gray-700 transition-colors text-sm"
+                                className="w-full rounded-2xl px-4 py-3 text-sm font-semibold text-slate-500 transition hover:text-slate-700"
                             >
-                                Ã„ÂÃƒÂ³ng cÃ¡Â»Â­a sÃ¡Â»â€¢
+                                Đóng cửa sổ
                             </button>
                         </div>
                     </div>
                 </div>
-
-                <style jsx global>{`
-                    @keyframes bounceIn {
-                        0% { transform: scale(0); opacity: 0; }
-                        50% { transform: scale(1.2); }
-                        100% { transform: scale(1); opacity: 1; }
-                    }
-                    .animate-bounceIn {
-                        animation: bounceIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-                    }
-                `}</style>
             </div>
         );
     }
 
-    // Normal Confirm UI
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            {/* Backdrop */}
-            <div
-                className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity"
-                onClick={!isSubmitting ? onClick : undefined}
-            ></div>
+            <div className="absolute inset-0 bg-black/80 backdrop-blur-sm" onClick={!isSubmitting ? onClick : undefined} />
 
-            {/* Modal Container */}
-            <div className="relative bg-[#151021] border border-white/10 w-full max-w-md rounded-2xl shadow-2xl overflow-hidden animate-scaleIn">
-                {/* Decoration */}
-                <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-purple-600"></div>
-                <div className="absolute -top-20 -right-20 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl"></div>
-                <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl"></div>
+            <div className="relative w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 bg-[#151021] shadow-2xl">
+                <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-cyan-400 via-sky-500 to-fuchsia-500" />
+                <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-fuchsia-500/10 blur-3xl" />
+                <div className="absolute -bottom-20 -left-20 h-40 w-40 rounded-full bg-cyan-500/10 blur-3xl" />
 
-                {/* Header */}
-                <div className="p-6 pb-2 relative z-10">
-                    <div className="flex justify-between items-start mb-4">
-                        <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                            <FiShield className="text-purple-500" /> XÃƒÂ¡c nhÃ¡ÂºÂ­n thanh toÃƒÂ¡n
-                        </h2>
+                <div className="relative z-10 p-6 pb-4">
+                    <div className="mb-4 flex items-start justify-between gap-4">
+                        <div>
+                            <h2 className="flex items-center gap-2 text-xl font-bold text-white">
+                                <FiShield className="text-fuchsia-400" />
+                                Xác nhận đơn nạp
+                            </h2>
+                            <p className="mt-2 text-sm text-[#9fb8db]">Kiểm tra lại thông tin trước khi trừ số dư.</p>
+                        </div>
                         <button
+                            type="button"
                             onClick={onClick}
                             disabled={isSubmitting}
-                            className="text-slate-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="rounded-full p-1 text-slate-500 transition hover:text-white disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             <FiX size={20} />
                         </button>
                     </div>
+
+                    <div className="rounded-2xl border border-white/8 bg-[#090514] p-4">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-fuchsia-500/10 text-fuchsia-300">
+                                <FiPackage size={22} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Gói nạp</p>
+                                <p className="truncate text-base font-bold text-white">{data.package.package_name}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-slate-500">Giá</p>
+                                <p className="text-lg font-black text-emerald-400">{formatPrice(data.package.price)}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                {/* Body */}
-                <div className="px-6 space-y-4 relative z-10 max-h-[70vh] overflow-y-auto custom-scrollbar">
-
-                    {/* Package Info Card */}
-                    <div className="bg-[#090514] border border-white/5 rounded-xl p-4 flex items-center gap-4">
-                        <div className="w-12 h-12 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-400">
-                            <FiPackage size={24} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <div className="text-xs text-slate-500 font-bold uppercase mb-0.5">GÃƒÂ³i nÃ¡ÂºÂ¡p</div>
-                            <div className="text-white font-bold truncate">{data.package.package_name}</div>
-                            <div className="text-xs text-blue-400 font-medium bg-blue-500/10 px-1.5 py-0.5 rounded inline-block mt-1">
-                                {data.package.package_type}
+                <div className="relative z-10 max-h-[54vh] space-y-3 overflow-y-auto px-6 pb-4">
+                    {detailRows.map((row) =>
+                        row.isNote ? (
+                            <div key={row.key} className="rounded-2xl border border-white/8 bg-white/[0.03] p-3">
+                                <p className="mb-1.5 flex items-center gap-2 text-sm text-slate-300">
+                                    <row.icon className="text-slate-500" />
+                                    {row.label}
+                                </p>
+                                <p className="text-sm leading-6 text-white/90">{row.value}</p>
                             </div>
-                        </div>
-                        <div className="text-right">
-                            <div className="text-xs text-slate-500 font-bold uppercase mb-0.5">GiÃƒÂ¡ tiÃ¡Â»Ân</div>
-                            <div className="text-green-400 font-bold text-lg">
-                                {formatPrice(data.package.price)}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Account Info List */}
-                    <div className="space-y-3">
-                        {data.server && (
-                            <div className="flex justify-between items-center py-2 border-b border-white/5">
-                                <span className="text-slate-400 text-sm flex items-center gap-2">
-                                    <FiServer className="text-slate-600" /> Server
+                        ) : (
+                            <div key={row.key} className="flex items-center justify-between gap-3 border-b border-white/6 py-2.5">
+                                <span className="flex items-center gap-2 text-sm text-slate-400">
+                                    <row.icon className="text-slate-600" />
+                                    {row.label}
                                 </span>
-                                <span className="text-white font-medium">{data.server}</span>
+                                <span className="max-w-[58%] text-right text-sm font-medium text-white break-words">{row.value}</span>
                             </div>
-                        )}
-                        {data.paymentMethod && (
-                            <div className="flex justify-between items-center py-2 border-b border-white/5">
-                                <span className="text-slate-400 text-sm flex items-center gap-2">
-                                    <FiShield className="text-slate-600" /> Thanh toÃƒÂ¡n
-                                </span>
-                                <span className="text-white font-medium">{data.paymentMethod.label}</span>
-                            </div>
-                        )}
-                        {data.idServer && (
-                            <div className="flex justify-between items-center py-2 border-b border-white/5">
-                                <span className="text-slate-400 text-sm flex items-center gap-2">
-                                    <FiGlobe className="text-slate-600" /> Zone ID
-                                </span>
-                                <span className="text-white font-medium">{data.idServer}</span>
-                            </div>
-                        )}
-                        <div className="flex justify-between items-center py-2 border-b border-white/5">
-                            <span className="text-slate-400 text-sm flex items-center gap-2">
-                                <FiUser className="text-slate-600" /> UID / TÃƒÂ i khoÃ¡ÂºÂ£n
-                            </span>
-                            <span className="text-white font-medium text-right max-w-[200px] truncate" title={data.uid || data.username}>
-                                {data.uid || data.username}
-                            </span>
-                        </div>
+                        )
+                    )}
 
-                        {["LOG", "log"].includes(data.package.package_type) && data.password && (
-                            <div className="flex justify-between items-center py-2 border-b border-white/5">
-                                <span className="text-slate-400 text-sm flex items-center gap-2">
-                                    <FiKey className="text-slate-600" /> MÃ¡ÂºÂ­t khÃ¡ÂºÂ©u
-                                </span>
-                                <span className="text-white font-medium font-mono">******</span>
-                            </div>
-                        )}
-
-                        <div className="flex justify-between items-center py-2 border-b border-white/5">
-                            <span className="text-slate-400 text-sm flex items-center gap-2">
-                                <FiMessageSquare className="text-slate-600" /> Zalo
-                            </span>
-                            <span className="text-white font-medium">{data.zaloNumber}</span>
-                        </div>
-
-                        {data.note && (
-                            <div className="py-2">
-                                <span className="text-slate-400 text-sm flex items-center gap-2 mb-1">
-                                    <FiInfo className="text-slate-600" /> Ghi chÃƒÂº
-                                </span>
-                                <div className="text-slate-300 text-sm bg-white/5 p-2 rounded italic font-medium">
-                                    "{data.note}"
-                                </div>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Warning */}
-                    <div className="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-3 flex gap-3">
-                        <FiAlertTriangle className="text-yellow-500 shrink-0 mt-0.5" />
-                        <p className="text-yellow-200 text-xs leading-relaxed">
-                            Vui lÃƒÂ²ng kiÃ¡Â»Æ’m tra kÃ¡Â»Â¹ thÃƒÂ´ng tin. Ã„ÂÃ†Â¡n hÃƒÂ ng sÃ¡ÂºÂ½ khÃƒÂ´ng thÃ¡Â»Æ’ hoÃƒÂ n tiÃ¡Â»Ân nÃ¡ÂºÂ¿u bÃ¡ÂºÂ¡n Ã„â€˜iÃ¡Â»Ân sai thÃƒÂ´ng tin nhÃƒÂ¢n vÃ¡ÂºÂ­t.
+                    <div className="flex gap-3 rounded-2xl border border-amber-400/20 bg-amber-400/10 p-3">
+                        <FiAlertTriangle className="mt-0.5 shrink-0 text-amber-300" />
+                        <p className="text-xs leading-6 text-amber-100">
+                            Hệ thống sẽ xử lý theo đúng thông tin bạn đã nhập. Nếu nhập sai UID, server hoặc tài khoản, đơn có thể không hỗ trợ hoàn lại.
                         </p>
                     </div>
                 </div>
 
-                {/* Footer */}
-                <div className="p-6 pt-4 flex gap-3 relative z-10">
+                <div className="relative z-10 flex gap-3 p-6 pt-3">
                     <button
+                        type="button"
                         onClick={onClick}
                         disabled={isSubmitting}
-                        className="flex-1 py-3 bg-[#1E1730] hover:bg-[#281f3d] text-slate-300 font-bold rounded-xl transition-all border border-white/5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 rounded-2xl border border-white/8 bg-[#1d1730] px-4 py-3 font-semibold text-slate-300 transition hover:bg-[#281f3d] disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        Quay lÃ¡ÂºÂ¡i
+                        Quay lại
                     </button>
 
                     <button
+                        type="button"
                         disabled={isSubmitting}
                         onClick={async () => {
                             if (isSubmitting) return;
+
                             setIsSubmitting(true);
+
                             const accountInfo = {
-                                uid: data.uid,
-                                server: data.server,
-                                id_server: data.idServer,
+                                ...(data.accountInfo || {}),
                                 payment_method: data.paymentMethod?.id || null,
                                 payment_method_label: data.paymentMethod?.label || null,
-                                zaloNumber: data.zaloNumber,
-                                phone: data.zaloNumber,
-                                note: data.note || "",
+                                note: data.accountInfo?.note || data.note || "",
                             };
-                            if (data.username) accountInfo.username = data.username;
-                            if (data.password) accountInfo.password = data.password;
+
+                            if (!accountInfo.server && data.server) accountInfo.server = data.server;
+                            if (!accountInfo.id_server && data.idServer) accountInfo.id_server = data.idServer;
+                            if (!accountInfo.uid && data.uid) accountInfo.uid = data.uid;
+                            if (!accountInfo.username && data.username) accountInfo.username = data.username;
+                            if (!accountInfo.password && data.password) accountInfo.password = data.password;
+                            if (!accountInfo.zaloNumber && data.zaloNumber) accountInfo.zaloNumber = data.zaloNumber;
+                            if (!accountInfo.phone && data.zaloNumber) accountInfo.phone = data.zaloNumber;
 
                             const payload = {
                                 package_id: data.package.id,
@@ -266,28 +349,27 @@ export default function ConfirmForm({ data, onClick }) {
                             };
 
                             try {
-                                const result = await createOrder(payload);
-                                setOrderResult(result);
-                                setIsSuccess(true);
-
+                                await createOrder(payload);
                                 connectSocket(localStorage.getItem("token"));
+                                setIsSuccess(true);
                             } catch (error) {
-                                const message = error?.response?.data?.message || "TÃ¡ÂºÂ¡o Ã„â€˜Ã†Â¡n hÃƒÂ ng thÃ¡ÂºÂ¥t bÃ¡ÂºÂ¡i!";
+                                const message = error?.response?.data?.message || "Tạo đơn hàng thất bại.";
                                 toast.error(message);
                                 setIsSubmitting(false);
                             }
                         }}
-                        className="flex-[2] py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold rounded-xl shadow-lg shadow-purple-500/25 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                        className="flex-[1.5] rounded-2xl bg-gradient-to-r from-sky-500 to-fuchsia-500 px-4 py-3 font-bold text-white shadow-[0_12px_30px_rgba(59,130,246,0.25)] transition hover:from-sky-400 hover:to-fuchsia-400 disabled:cursor-not-allowed disabled:opacity-70"
                     >
                         {isSubmitting ? (
-                            <>
-                                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                <span>Ã„Âang xÃ¡Â»Â­ lÃƒÂ½...</span>
-                            </>
+                            <span className="flex items-center justify-center gap-2">
+                                <span className="h-5 w-5 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                                Đang xử lý...
+                            </span>
                         ) : (
-                            <>
-                                <FiCheck strokeWidth={3} /> XÃƒÂ¡c thÃ¡Â»Â±c & NÃ¡ÂºÂ¡p
-                            </>
+                            <span className="flex items-center justify-center gap-2">
+                                Xác nhận nạp
+                                <FiArrowRight size={18} />
+                            </span>
                         )}
                     </button>
                 </div>

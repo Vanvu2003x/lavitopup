@@ -11,11 +11,7 @@ export default function StickyBottomBar({
     game,
     canCheckout,
 }) {
-    const formatPrice = (price) =>
-        new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-        }).format(price || 0);
+    const formatPrice = (price) => `${new Intl.NumberFormat("vi-VN").format(Number(price) || 0)} VNĐ`;
 
     return (
         <div className="fixed inset-x-0 bottom-0 z-50 border-t border-white/10 bg-[#06101f]/92 backdrop-blur-xl">

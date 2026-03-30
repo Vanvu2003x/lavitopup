@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
-import { FiZap } from "react-icons/fi";
+import { FiLayers, FiZap } from "react-icons/fi";
 import { HiSwitchHorizontal } from "react-icons/hi";
 
 import ConfirmForm from "@/components/auth/ConfirmForm";
@@ -53,7 +53,18 @@ const resolveMappedFieldValue = (name, values) => {
     return values.extraFields?.[normalized] || "";
 };
 
-const buildPartnerAccountInfo = ({ game, rechargeMethod, uid, username, password, server, idServer, zaloNumber, note, extraFields }) => {
+const buildPartnerAccountInfo = ({
+    game,
+    rechargeMethod,
+    uid,
+    username,
+    password,
+    server,
+    idServer,
+    zaloNumber,
+    note,
+    extraFields,
+}) => {
     const inputFields = Array.isArray(game?.input_fields) ? game.input_fields : [];
     const visibleFields = inputFields.filter((field) => shouldShowPartnerField(field?.name, rechargeMethod));
 
@@ -106,7 +117,18 @@ const buildPartnerAccountInfo = ({ game, rechargeMethod, uid, username, password
     return accountInfo;
 };
 
-const validatePartnerFields = ({ game, rechargeMethod, uid, username, password, server, idServer, zaloNumber, note, extraFields }) => {
+const validatePartnerFields = ({
+    game,
+    rechargeMethod,
+    uid,
+    username,
+    password,
+    server,
+    idServer,
+    zaloNumber,
+    note,
+    extraFields,
+}) => {
     const inputFields = Array.isArray(game?.input_fields) ? game.input_fields : [];
     const visibleFields = inputFields.filter((field) => shouldShowPartnerField(field?.name, rechargeMethod));
 
@@ -127,7 +149,7 @@ const validatePartnerFields = ({ game, rechargeMethod, uid, username, password, 
         });
 
         if (value === undefined || value === null || String(value).trim() === "") {
-            return field?.label || field?.name || "thÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â´ng tin bÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂºÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¯t buÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¾ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢c";
+            return field?.label || field?.name || "thông tin bắt buộc";
         }
     }
 
@@ -144,6 +166,7 @@ const pickPrimaryValue = (accountInfo, candidates = []) => {
 
     return "";
 };
+
 export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGames = [] }) {
     const toast = useToast();
     const router = useRouter();
@@ -224,20 +247,25 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
         fetchUserLevel();
     }, []);
 
-    const availableMethods = useMemo(() => ({
-        uid: listPkg.some((pkg) => pkg.status === "active" && !["log", "login"].includes(pkg.package_type?.toLowerCase())),
-        login: listPkg.some((pkg) => pkg.status === "active" && ["log", "login"].includes(pkg.package_type?.toLowerCase())),
-    }), [listPkg]);
+    const availableMethods = useMemo(
+        () => ({
+            uid: listPkg.some((pkg) => pkg.status === "active" && !["log", "login"].includes(pkg.package_type?.toLowerCase())),
+            login: listPkg.some((pkg) => pkg.status === "active" && ["log", "login"].includes(pkg.package_type?.toLowerCase())),
+        }),
+        [listPkg]
+    );
 
-    const displayPackages = useMemo(() => (
-        rechargeMethod === "uid"
-            ? listPkg.filter((pkg) => pkg.status === "active" && !["log", "login"].includes(pkg.package_type?.toLowerCase()))
-            : listPkg.filter((pkg) => pkg.status === "active" && ["log", "login"].includes(pkg.package_type?.toLowerCase()))
-    ), [listPkg, rechargeMethod]);
+    const displayPackages = useMemo(
+        () =>
+            rechargeMethod === "uid"
+                ? listPkg.filter((pkg) => pkg.status === "active" && !["log", "login"].includes(pkg.package_type?.toLowerCase()))
+                : listPkg.filter((pkg) => pkg.status === "active" && ["log", "login"].includes(pkg.package_type?.toLowerCase())),
+        [listPkg, rechargeMethod]
+    );
 
     const handleBuyNow = () => {
         if (!selectedPkg) {
-            toast.warn("Vui long chon goi truoc.");
+            toast.warn("Vui lòng chọn gói trước.");
             return;
         }
 
@@ -255,20 +283,20 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
         });
 
         if (missingField) {
-            toast.warn(`Vui long nhap ${missingField}.`);
+            toast.warn(`Vui lòng nhập ${missingField}.`);
             return;
         }
 
         if (!Array.isArray(game?.input_fields) || game.input_fields.length === 0) {
             if (rechargeMethod === "uid") {
-                if (!uid) return toast.warn("Vui long nhap UID.");
-                if (game?.server?.length > 1 && !selectedPkg?.id_server && !server) return toast.warn("Vui long chon may chu.");
-                if ((game?.server?.length === 0 || selectedPkg?.id_server) && !idServer) return toast.warn("Vui long nhap server.");
+                if (!uid) return toast.warn("Vui lòng nhập UID.");
+                if (game?.server?.length > 1 && !selectedPkg?.id_server && !server) return toast.warn("Vui lòng chọn máy chủ.");
+                if ((game?.server?.length === 0 || selectedPkg?.id_server) && !idServer) return toast.warn("Vui lòng nhập máy chủ.");
             } else {
-                if (!username || !password) return toast.warn("Vui long nhap tai khoan va mat khau.");
-                if (!zaloNumber) return toast.warn("Vui long nhap so Zalo.");
-                if (game?.server?.length > 1 && !selectedPkg?.id_server && !server) return toast.warn("Vui long chon may chu.");
-                if ((game?.server?.length === 0 || selectedPkg?.id_server) && !idServer) return toast.warn("Vui long nhap server.");
+                if (!username || !password) return toast.warn("Vui lòng nhập tài khoản và mật khẩu.");
+                if (!zaloNumber) return toast.warn("Vui lòng nhập số Zalo.");
+                if (game?.server?.length > 1 && !selectedPkg?.id_server && !server) return toast.warn("Vui lòng chọn máy chủ.");
+                if ((game?.server?.length === 0 || selectedPkg?.id_server) && !idServer) return toast.warn("Vui lòng nhập máy chủ.");
             }
         }
 
@@ -302,37 +330,57 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
             </div>
 
             <main className="relative z-10 mx-auto max-w-[1280px] px-4 pb-24 pt-3 sm:px-6 lg:pb-28 lg:pt-5">
-                <motion.section initial={{ opacity: 0, y: 18 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45 }} className="mb-6 overflow-hidden rounded-[2rem] border border-white/10 bg-[#07142d]">
+                <motion.section
+                    initial={{ opacity: 0, y: 18 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.45 }}
+                    className="mb-6 overflow-hidden rounded-[2rem] border border-white/10 bg-[#07142d]"
+                >
                     <div className="relative min-h-[300px] overflow-hidden">
                         <img src={posterSrc} alt={game?.name || "Game"} className="absolute inset-0 h-full w-full object-cover" />
-                        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(3,8,20,0.92)_0%,rgba(3,8,20,0.72)_42%,rgba(3,8,20,0.38)_100%)]" />
+                        <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(3,8,20,0.94)_0%,rgba(3,8,20,0.76)_44%,rgba(3,8,20,0.42)_100%)]" />
                         <div className="relative z-10 flex min-h-[300px] flex-col justify-between p-5 sm:p-7">
                             <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[#9ab6df]">
-                                <a href="/" className="transition hover:text-white">Trang chÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â§</a>
+                                <a href="/" className="transition hover:text-white">Trang chủ</a>
                                 <span>/</span>
-                                <span>NÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂºÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡p game</span>
+                                <span>Nạp game</span>
                                 <span>/</span>
                                 <span className="text-[#5eead4]">{game?.name || "Game"}</span>
                             </div>
 
                             <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-end">
-                                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.08 }} className="max-w-2xl">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: 0.08 }}
+                                    className="max-w-2xl"
+                                >
                                     <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/20 bg-cyan-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-200">
                                         <FiZap className="h-3.5 w-3.5" />
-                                        XÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­ lÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â½ tÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â± ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¾ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¾ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ng
+                                        Tự động xử lý
                                     </div>
-                                    <h1 className="text-3xl font-bold tracking-[-0.04em] text-white sm:text-4xl">NÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂºÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡p {game?.name}</h1>
+                                    <h1 className="text-3xl font-bold tracking-[-0.04em] text-white sm:text-4xl">
+                                        Nạp {game?.name}
+                                    </h1>
+                                    <p className="mt-3 max-w-xl text-sm leading-6 text-[#c9d9f2] sm:text-base">
+                                        Chọn đúng gói, nhập đúng thông tin và xác nhận bằng ví số dư. Màn hình này đã được tối ưu để thao tác nhanh hơn trên cả điện thoại lẫn desktop.
+                                    </p>
                                 </motion.div>
 
                                 {allTopUpGames.length > 0 ? (
-                                    <motion.div initial={{ opacity: 0, x: 14 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 0.45, delay: 0.12 }} className="relative">
+                                    <motion.div
+                                        initial={{ opacity: 0, x: 14 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ duration: 0.45, delay: 0.12 }}
+                                        className="relative"
+                                    >
                                         <button
                                             type="button"
                                             onClick={() => setShowGameDropdown(!showGameDropdown)}
                                             className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-xl border border-white/10 bg-white/[0.06] px-3 py-2 text-xs font-semibold text-white transition hover:bg-white/[0.1] sm:px-4 sm:py-2.5 sm:text-sm"
                                         >
                                             <HiSwitchHorizontal size={14} className="sm:h-4 sm:w-4" />
-                                            ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¾ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢i game
+                                            Đổi game
                                         </button>
 
                                         {showGameDropdown ? (
@@ -348,7 +396,11 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
                                                                     if (item.gamecode !== game?.gamecode) router.push(`/categories/topup/${item.gamecode}`);
                                                                     setShowGameDropdown(false);
                                                                 }}
-                                                                className={`flex w-full items-center gap-2 rounded-[1rem] px-2.5 py-2 text-left text-xs transition sm:text-sm ${item.gamecode === game?.gamecode ? "border border-[#5eead4]/40 bg-[#5eead4]/10" : "border border-transparent bg-white/[0.03] hover:bg-white/[0.06]"}`}
+                                                                className={`flex w-full items-center gap-2 rounded-[1rem] px-2.5 py-2 text-left text-xs transition sm:text-sm ${
+                                                                    item.gamecode === game?.gamecode
+                                                                        ? "border border-[#5eead4]/40 bg-[#5eead4]/10"
+                                                                        : "border border-transparent bg-white/[0.03] hover:bg-white/[0.06]"
+                                                                }`}
                                                             >
                                                                 <img src={getImageSrc(item.thumbnail)} alt={item.name} className="h-8 w-8 rounded-md object-cover" />
                                                                 <span className="line-clamp-1 font-medium text-white">{item.name}</span>
@@ -362,16 +414,21 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
                                 ) : null}
                             </div>
 
-                            <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.45, delay: 0.18 }} className="mt-6 flex flex-wrap items-center gap-3">
+                            <motion.div
+                                initial={{ opacity: 0, y: 16 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.45, delay: 0.18 }}
+                                className="mt-6 flex flex-wrap items-center gap-3"
+                            >
                                 <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/25 px-3 py-2 text-sm text-white">
                                     <img src={thumbnailSrc} alt={game?.name || "Game"} className="h-9 w-9 rounded-full object-cover" />
                                     <div className="text-left">
-                                        <p className="text-[11px] uppercase tracking-[0.18em] text-[#9ab6df]">Poster ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã¢â‚¬Â¦Ãƒâ€šÃ‚Â¾ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â¹ÃƒÆ’Ã¢â‚¬Â¦ÃƒÂ¢Ã¢â€šÂ¬Ã…â€œang hiÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€šÃ‚Â ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¾Ãƒâ€šÃ‚Â¢n thÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¬ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¹</p>
-                                        <p className="font-semibold">{game?.publisher || "Topup24h"}</p>
+                                        <p className="text-[11px] uppercase tracking-[0.18em] text-[#9ab6df]">Poster đang hiển thị</p>
+                                        <p className="font-semibold">{game?.publisher || "LaviTopup"}</p>
                                     </div>
                                 </div>
                                 <div className="rounded-full border border-white/10 bg-white/[0.04] px-4 py-2 text-xs font-semibold uppercase tracking-[0.18em] text-[#9ab6df]">
-                                    NhÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚ÂºÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­p thÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â´ng tin {"->"} ChÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â»ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Ân gÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³i {"->"} Thanh toÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Â ÃƒÂ¢Ã¢â€šÂ¬Ã¢â€žÂ¢ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã‚Â ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬ÃƒÂ¢Ã¢â‚¬Å¾Ã‚Â¢ÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã‚Â¢ÃƒÂ¢Ã¢â‚¬Å¡Ã‚Â¬Ãƒâ€¦Ã‚Â¡ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡n
+                                    Nhập thông tin {"->"} Chọn gói {"->"} Xác nhận
                                 </div>
                             </motion.div>
                         </div>
@@ -414,8 +471,15 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
 
                     <div className="order-2 w-full lg:order-none">
                         <section className="surface-card rounded-[2rem] p-4 sm:p-5">
-                            <div className="mb-4 border-b border-white/10 pb-3">
-                                <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5eead4]">Chon goi nap</p>
+                            <div className="mb-4 flex items-center justify-between gap-3 border-b border-white/10 pb-3">
+                                <div>
+                                    <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#5eead4]">Chọn gói nạp</p>
+                                    <p className="mt-1 text-xs text-[#9fb8db]">Hệ thống sẽ dùng mức giá theo loại tài khoản hiện tại của bạn.</p>
+                                </div>
+                                <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.14em] text-[#c9d9f2]">
+                                    <FiLayers size={13} />
+                                    {displayPackages.length} gói
+                                </div>
                             </div>
 
                             {loading || displayPackages.length > 0 ? (
@@ -431,8 +495,8 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
                                     <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-white/10 bg-white/[0.04] text-[#5eead4]">
                                         <FiZap size={20} />
                                     </div>
-                                    <p className="mt-3 text-sm font-semibold text-white">Chua co goi kha dung</p>
-                                    <p className="mt-1 text-xs text-[#9fb8db]">Thu doi kieu nap hoac quay lai sau.</p>
+                                    <p className="mt-3 text-sm font-semibold text-white">Chưa có gói khả dụng</p>
+                                    <p className="mt-1 text-xs text-[#9fb8db]">Thử đổi kiểu nạp hoặc quay lại sau ít phút.</p>
                                 </div>
                             )}
                         </section>

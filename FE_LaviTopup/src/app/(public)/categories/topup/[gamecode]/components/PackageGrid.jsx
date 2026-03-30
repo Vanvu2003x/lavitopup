@@ -5,11 +5,7 @@ import { Check, Zap, Sparkles, Diamond } from "lucide-react";
 
 const baseURLAPI = process.env.NEXT_PUBLIC_API_URL;
 
-const formatPrice = (price) =>
-    new Intl.NumberFormat("en-US", {
-        style: "currency",
-        currency: "USD",
-    }).format(price || 0);
+const formatPrice = (price) => new Intl.NumberFormat("vi-VN").format(Number(price) || 0);
 
 export default function PackageGrid({ loading, displayPackages, selectedPkg, setSelectedPkg, userLevel = 1 }) {
     const getDisplayPrice = (pkg, level) => {
@@ -155,7 +151,7 @@ export default function PackageGrid({ loading, displayPackages, selectedPkg, set
                                         <div className="flex items-baseline gap-1">
                                             <Diamond className={`h-4 w-4 mb-0.5 transition-colors ${isSelected ? "text-[#53e5c6] fill-[#53e5c6]/30" : "text-[#ff8456] fill-[#ff8456]/20"}`} />
                                             <span className={`text-base sm:text-lg font-black tracking-tighter ${isSelected ? "text-white drop-shadow-[0_0_8px_rgba(83,229,198,0.5)]" : "text-white"}`}>
-                                                {formatPrice(finalPrice).replace("₫", "")}
+                                                {formatPrice(finalPrice)}
                                             </span>
                                             <span className={`text-[10px] sm:text-xs w-4 font-bold ${isSelected ? "text-[#53e5c6]" : "text-white/50"}`}>
                                                 VNĐ
