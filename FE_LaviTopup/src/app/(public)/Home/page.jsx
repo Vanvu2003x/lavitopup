@@ -4,8 +4,7 @@ const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://lavitopup.io.vn";
 
 export const metadata = {
     title: "Trang chủ phụ",
-    description:
-        "Đường dẫn phụ của trang chủ LaviTopup. Nội dung chính được chuẩn hóa về trang chủ gốc.",
+    description: "Đường dẫn phụ của trang chủ LaviTopup. Nội dung chính được chuẩn hóa về trang chủ gốc.",
     metadataBase: new URL(siteUrl),
     alternates: {
         canonical: "/",
@@ -37,14 +36,8 @@ const orgJsonLd = {
 export default function HomePage() {
     return (
         <>
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }}
-            />
-            <script
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
-            />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteJsonLd) }} />
+            <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }} />
             <HomeClient games={[]} />
         </>
     );

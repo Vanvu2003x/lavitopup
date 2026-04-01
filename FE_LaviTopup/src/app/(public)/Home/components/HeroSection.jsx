@@ -5,26 +5,26 @@ import { FiArrowRight, FiCheckCircle, FiShield, FiZap } from "react-icons/fi";
 
 const benefits = [
     {
-        title: "Nap tu dong",
-        description: "Tao don nhanh, thao tac gon va de theo doi tren he thong.",
+        title: "Nạp tự động",
+        description: "Tạo đơn nhanh, thao tác gọn và dễ theo dõi trên hệ thống.",
         icon: FiZap,
         iconColor: "text-[#ff8456]",
     },
     {
-        title: "Nhieu game",
-        description: "Danh sach game hien thi ro rang de ban chon nhanh hon.",
+        title: "Nhiều game",
+        description: "Danh sách game hiển thị rõ ràng để bạn chọn nhanh hơn.",
         icon: FiCheckCircle,
         iconColor: "text-[#53e5c6]",
     },
     {
-        title: "Ho tro nhanh",
-        description: "Co the lien he ngay khi can kiem tra don hang hoac thong tin nap.",
+        title: "Hỗ trợ nhanh",
+        description: "Có thể liên hệ ngay khi cần kiểm tra đơn hàng hoặc thông tin nạp.",
         icon: FiShield,
         iconColor: "text-[#6ab9ff]",
     },
 ];
 
-const quickSteps = ["Tim game muon nap", "Nhap ID nhan vat", "Chon goi va thanh toan"];
+const quickSteps = ["Tìm game muốn nạp", "Nhập ID nhân vật", "Chọn gói và thanh toán"];
 
 export default function HeroSection() {
     return (
@@ -48,7 +48,7 @@ export default function HeroSection() {
 
                     <div className="rise-up" style={{ animationDelay: "120ms" }}>
                         <div className="glass-panel overflow-hidden rounded-[1.8rem] p-5 sm:p-6">
-                            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#53e5c6]">Chi can 3 buoc</p>
+                            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#53e5c6]">Chỉ cần 3 bước</p>
                             <div className="mt-4 space-y-3">
                                 {quickSteps.map((item, index) => (
                                     <div key={item} className="flex items-center gap-3 rounded-2xl bg-white/[0.03] px-4 py-3 transition hover:bg-white/[0.08]">
@@ -66,14 +66,14 @@ export default function HeroSection() {
                                 href="#danh-muc-game"
                                 className="inline-flex items-center justify-center gap-2 rounded-full bg-[#53e5c6] px-6 py-3.5 text-sm font-bold text-[#07142d] shadow-[0_0_20px_rgba(83,229,198,0.25)] transition hover:scale-105 hover:bg-[#6ff0d5] hover:shadow-[0_0_30px_rgba(83,229,198,0.4)]"
                             >
-                                Xem danh sach game
+                                Xem danh sách game
                                 <FiArrowRight size={16} />
                             </Link>
                             <a
                                 href="#giao-dien"
                                 className="inline-flex items-center justify-center rounded-full border border-white/5 bg-white/[0.03] px-6 py-3.5 text-sm font-bold text-white transition hover:scale-105 hover:bg-white/[0.06]"
                             >
-                                Xem cach nap
+                                Xem cách nạp
                             </a>
                         </div>
                     </div>

@@ -142,9 +142,6 @@ export default function TopUpForm({
                             {rechargeMethod === "uid" ? "Nhập thông tin thật nhanh" : "Đăng nhập tài khoản"}
                         </h2>
                     </div>
-                    <div className="rounded-full border border-white/10 bg-white/[0.04] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-[#a7c0e0]">
-                        Chuẩn hóa
-                    </div>
                 </div>
                 <p className="mt-2.5 text-xs leading-5 text-[#8aa0d0]">
                     Nhập chính xác để xử lý nhanh hơn.
@@ -166,7 +163,7 @@ export default function TopUpForm({
                     onClick={() => setRechargeMethod("login")}
                     className={`rounded-lg px-3 py-2.5 text-xs font-semibold transition sm:text-sm ${rechargeMethod === "login" ? "bg-[#fb7185] text-white shadow-lg shadow-[#fb7185]/20" : "text-[#a7c0e0] hover:bg-white/[0.04]"} ${!availableMethods.login ? "cursor-not-allowed opacity-40" : ""}`}
                 >
-                    Tài khoản
+                    Nạp login
                 </button>
             </div>
 

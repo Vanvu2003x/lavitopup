@@ -68,9 +68,7 @@ export default function CardGame({ game, type, onClick }) {
                 <h3 className="line-clamp-2 text-xl font-black leading-tight text-white transition group-hover:text-[#53e5c6]">
                     {game.name}
                 </h3>
-                <p className="mt-2 line-clamp-1 text-sm text-[#98b3dc]">
-                    {game.publisher || "Nhà phát hành đang cập nhật"}
-                </p>
+                <p className="mt-2 line-clamp-1 text-sm text-[#98b3dc]">{game.publisher || "Nhà phát hành đang cập nhật"}</p>
 
                 <div className="mt-4 flex items-center gap-2 text-sm text-[#a8c0e4]">
                     <FiCheckCircle className="shrink-0 text-[#53e5c6]" size={16} />

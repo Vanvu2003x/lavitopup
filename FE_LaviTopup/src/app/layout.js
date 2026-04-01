@@ -17,16 +17,8 @@ export const metadata = {
         default: "LaviTopup | Topup và tài khoản game",
         template: "%s | LaviTopup",
     },
-    description:
-        "LaviTopup cung cấp topup và tài khoản game với giao diện rõ ràng, thao tác nhanh và hỗ trợ trực tiếp khi cần.",
-    keywords: [
-        "LaviTopup",
-        "topup game",
-        "nạp game",
-        "tài khoản game",
-        "mua tài khoản game",
-        "shop acc",
-    ],
+    description: "LaviTopup cung cấp topup và tài khoản game với giao diện rõ ràng, thao tác nhanh và hỗ trợ trực tiếp khi cần.",
+    keywords: ["LaviTopup", "topup game", "nạp game", "tài khoản game", "mua tài khoản game", "shop acc"],
     authors: [{ name: "LaviTopup" }],
     creator: "LaviTopup",
     publisher: "LaviTopup",
@@ -41,8 +33,7 @@ export const metadata = {
         url: siteUrl,
         siteName: "LaviTopup",
         title: "LaviTopup | Topup và tài khoản game",
-        description:
-            "Topup nhanh, giao diện dễ dùng và hỗ trợ trực tiếp cho các nhu cầu mua tài khoản game tại LaviTopup.",
+        description: "Topup nhanh, giao diện dễ dùng và hỗ trợ trực tiếp cho các nhu cầu mua tài khoản game tại LaviTopup.",
         images: [
             {
                 url: "/banner/logo.png",
@@ -55,8 +46,7 @@ export const metadata = {
     twitter: {
         card: "summary_large_image",
         title: "LaviTopup | Topup và tài khoản game",
-        description:
-            "Topup nhanh, giao diện dễ dùng và hỗ trợ trực tiếp cho các nhu cầu mua tài khoản game tại LaviTopup.",
+        description: "Topup nhanh, giao diện dễ dùng và hỗ trợ trực tiếp cho các nhu cầu mua tài khoản game tại LaviTopup.",
         images: ["/banner/logo.png"],
     },
     robots: {
