@@ -45,7 +45,7 @@ export const metadata = {
             "Topup nhanh, giao diện dễ dùng và hỗ trợ trực tiếp cho các nhu cầu mua tài khoản game tại LaviTopup.",
         images: [
             {
-                url: "/banner/4e4234e67024d97d7eff34daf88b8448.png",
+                url: "/banner/logo.png",
                 width: 1536,
                 height: 864,
                 alt: "LaviTopup",
@@ -57,7 +57,7 @@ export const metadata = {
         title: "LaviTopup | Topup và tài khoản game",
         description:
             "Topup nhanh, giao diện dễ dùng và hỗ trợ trực tiếp cho các nhu cầu mua tài khoản game tại LaviTopup.",
-        images: ["/banner/4e4234e67024d97d7eff34daf88b8448.png"],
+        images: ["/banner/logo.png"],
     },
     robots: {
         index: true,

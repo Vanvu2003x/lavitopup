@@ -12,7 +12,7 @@ import HeroSection from "./HeroSection";
 const supportLinks = [
     {
         title: "Messenger",
-        description: "Liên hệ trực tiếp để kiểm tra đơn hàng hoặc nhận hỗ trợ nhanh.",
+        description: "Lien he truc tiep de kiem tra don hang hoac nhan ho tro nhanh.",
         href: "https://www.facebook.com/messages/e2ee/t/1484722313227044",
         icon: FaFacebookF,
         iconWrapper: "bg-[#ff8456]/12 text-[#ff8456]",
@@ -20,9 +20,9 @@ const supportLinks = [
 ];
 
 const topupNotes = [
-    "Chọn game phù hợp từ danh sách đang hiển thị.",
-    "Đi tới trang nạp để nhập đúng thông tin nhân vật.",
-    "Chọn gói và hoàn tất thanh toán ngay trên giao diện.",
+    "Chon game phu hop tu danh sach dang hien thi.",
+    "Di toi trang nap de nhap dung thong tin nhan vat.",
+    "Chon goi va hoan tat thanh toan ngay tren giao dien.",
 ];
 
 const sectionLabelClass = "font-sans text-xs font-semibold uppercase tracking-[0.18em] text-[#53e5c6]";
@@ -42,7 +42,7 @@ export default function HomeClient({ games: initialGames = [] }) {
                 const data = await getGames();
                 setGames(Array.isArray(data) ? data : []);
             } catch (error) {
-                console.error("Không thể tải danh sách game:", error);
+                console.error("Khong the tai danh sach game:", error);
                 if (initialGames.length > 0) {
                     setGames(initialGames);
                 }
@@ -74,11 +74,9 @@ export default function HomeClient({ games: initialGames = [] }) {
                 <section id="danh-muc-game" className="surface-card scroll-mt-28 rounded-[2.5rem] p-6 sm:p-8">
                     <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                         <div>
-                            <p className={sectionLabelClass}>Danh sách game</p>
-                            <h2 className={sectionTitleClass}>Chọn game bạn muốn nạp</h2>
-                            <p className={sectionTextClass}>
-                                Tìm theo tên game hoặc nhà phát hành. Bấm vào game bất kỳ để đi tới trang nạp tiền.
-                            </p>
+                            <p className={sectionLabelClass}>Danh sach game</p>
+                            <h2 className={sectionTitleClass}>Chon game ban muon nap</h2>
+                            <p className={sectionTextClass}>Tim theo ten game hoac nha phat hanh. Bam vao game de di toi trang nap tien.</p>
                         </div>
 
                         <div className="relative w-full lg:max-w-sm">
@@ -87,7 +85,7 @@ export default function HomeClient({ games: initialGames = [] }) {
                                 type="text"
                                 value={searchTerm}
                                 onChange={(event) => setSearchTerm(event.target.value)}
-                                placeholder="Tìm tên game..."
+                                placeholder="Tim ten game..."
                                 className="h-[3.25rem] w-full rounded-2xl border border-white/5 bg-white/[0.02] pl-11 pr-4 text-sm font-medium text-white outline-none transition-all placeholder:text-[#8aa7d5] focus:border-[#53e5c6]/50 focus:bg-white/[0.04] focus:shadow-[0_0_20px_rgba(83,229,198,0.15)]"
                             />
                         </div>
@@ -95,10 +93,10 @@ export default function HomeClient({ games: initialGames = [] }) {
 
                     <div className="mt-6 flex flex-wrap gap-3">
                         <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-white">
-                            Tổng game: <span className="text-[#53e5c6]">{games.length}</span>
+                            Tong game: <span className="text-[#53e5c6]">{games.length}</span>
                         </div>
                         <div className="rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm font-semibold text-white">
-                            Đang hiển thị: <span className="text-[#ff8456]">{filteredGames.length}</span>
+                            Dang hien thi: <span className="text-[#ff8456]">{filteredGames.length}</span>
                         </div>
                     </div>
 
@@ -106,17 +104,14 @@ export default function HomeClient({ games: initialGames = [] }) {
                         {loading ? (
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
                                 {[...Array(8)].map((_, index) => (
-                                    <div
-                                        key={index}
-                                        className="surface-card h-[280px] animate-pulse rounded-[2rem] border border-white/10"
-                                    />
+                                    <div key={index} className="surface-card h-[280px] animate-pulse rounded-[2rem] border border-white/10" />
                                 ))}
                             </div>
                         ) : filteredGames.length === 0 ? (
                             <div className="rounded-[2rem] border border-dashed border-white/12 bg-white/[0.03] px-6 py-14 text-center">
                                 <FiSearch className="mx-auto text-[#53e5c6]" size={28} />
-                                <p className="mt-4 font-sans text-xl font-bold text-white">Không tìm thấy game phù hợp</p>
-                                <p className="mt-2 font-sans text-sm text-[#9fb7da]">Thử tìm bằng từ khóa khác để xem thêm kết quả.</p>
+                                <p className="mt-4 font-sans text-xl font-bold text-white">Khong tim thay game phu hop</p>
+                                <p className="mt-2 font-sans text-sm text-[#9fb7da]">Thu tim bang tu khoa khac de xem them ket qua.</p>
                             </div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -130,11 +125,10 @@ export default function HomeClient({ games: initialGames = [] }) {
 
                 <section id="giao-dien" className="grid scroll-mt-28 gap-6 lg:grid-cols-2">
                     <div className="surface-card rounded-[2.3rem] p-6">
-                        <p className={sectionLabelClass}>Cần hỗ trợ?</p>
-                        <h3 className={cardTitleClass}>Liên hệ nhanh khi cần hỗ trợ</h3>
+                        <p className={sectionLabelClass}>Can ho tro?</p>
+                        <h3 className={cardTitleClass}>Lien he nhanh khi can ho tro</h3>
                         <p className={sectionTextClass}>
-                            Nếu cần kiểm tra đơn hàng, xác nhận thông tin hoặc cần hỗ trợ thêm, bạn có thể liên hệ nhanh qua
-                            các kênh bên dưới.
+                            Neu can kiem tra don hang, xac nhan thong tin hoac can ho tro them, ban co the lien he nhanh qua kenh ben duoi.
                         </p>
 
                         <div className="mt-5 space-y-3">
@@ -166,8 +160,8 @@ export default function HomeClient({ games: initialGames = [] }) {
                     </div>
 
                     <div className="surface-card rounded-[2.3rem] p-6">
-                        <p className={sectionLabelClass}>Nạp game</p>
-                        <h3 className={cardTitleClass}>Các bước để bắt đầu nạp</h3>
+                        <p className={sectionLabelClass}>Nap game</p>
+                        <h3 className={cardTitleClass}>Cac buoc de bat dau nap</h3>
                         <div className="mt-5 space-y-3">
                             {topupNotes.map((item) => (
                                 <div

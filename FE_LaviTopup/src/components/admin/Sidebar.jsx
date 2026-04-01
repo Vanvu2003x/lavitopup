@@ -21,43 +21,36 @@ import { Logout } from "@/services/auth.service";
 const mainItems = [
     {
         label: "Tổng quan",
-        description: "Theo dõi sức khỏe hệ thống",
         href: "/admin/dashboard",
         icon: LayoutDashboard,
     },
     {
         label: "Khách hàng",
-        description: "Quản lý tài khoản và số dư",
         href: "/admin/danhmuc/UserManagerPage",
         icon: Users,
     },
     {
         label: "Game",
-        description: "Danh mục game đang bán",
         href: "/admin/danhmuc/GameManagerPage",
         icon: Gamepad2,
     },
     {
         label: "Gói nạp",
-        description: "Giá bán và trạng thái gói",
         href: "/admin/danhmuc/ToUpPackageManagerPage",
         icon: Package,
     },
     {
         label: "Đơn nạp",
-        description: "Kiểm soát giao dịch nạp game",
         href: "/admin/danhmuc/ToUpManagerPage",
         icon: ReceiptText,
     },
     {
         label: "Quản lý ví",
-        description: "Theo dõi giao dịch nạp ví",
         href: "/admin/danhmuc/WalletManagerPage",
         icon: CreditCard,
     },
     {
         label: "Doanh thu",
-        description: "Báo cáo và top khách hàng",
         href: "/admin/danhmuc/RevenueManagerPage",
         icon: BarChart3,
     },
@@ -88,18 +81,18 @@ export default function AdminSidebar({ isOpen, onClose }) {
 
     return (
         <aside
-            className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-white/10 bg-slate-950/90 shadow-2xl shadow-slate-950/60 backdrop-blur-xl transition-transform duration-300 md:translate-x-0 ${
+            className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-white/10 bg-slate-950 transition-transform duration-300 md:translate-x-0 ${
                 isOpen ? "translate-x-0" : "-translate-x-full"
             }`}
         >
             <div className="flex items-center justify-between border-b border-white/10 px-4 py-4">
                 <Link href="/admin/dashboard" className="flex items-center gap-3" onClick={onClose}>
-                    <div className="flex h-10 w-10 items-center justify-center rounded-[1.1rem] bg-[linear-gradient(135deg,#22d3ee_0%,#3b82f6_52%,#f97316_100%)] shadow-lg shadow-cyan-950/50">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-[1rem] bg-cyan-500/20 text-cyan-200">
                         <ShieldCheck className="h-4.5 w-4.5 text-white" />
                     </div>
                     <div>
-                        <p className="font-display text-base font-semibold text-white">Lavi Admin</p>
-                        <p className="text-[10px] uppercase tracking-[0.26em] text-cyan-200/80">Trung tâm quản trị</p>
+                        <p className="text-base font-semibold text-white">Lavi Admin</p>
+                        <p className="text-[10px] uppercase tracking-[0.26em] text-slate-400">Điều hành</p>
                     </div>
                 </Link>
 
@@ -129,7 +122,7 @@ export default function AdminSidebar({ isOpen, onClose }) {
                                 onClick={onClose}
                                 className={`group flex items-center gap-3 rounded-[1.15rem] border px-3.5 py-2.5 transition-all ${
                                     isActive
-                                        ? "border-cyan-400/30 bg-cyan-400/10 shadow-lg shadow-cyan-950/25"
+                                        ? "border-cyan-400/30 bg-cyan-400/10"
                                         : "border-transparent bg-transparent hover:border-white/10 hover:bg-white/5"
                                 }`}
                             >
@@ -144,11 +137,10 @@ export default function AdminSidebar({ isOpen, onClose }) {
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <p className={`truncate text-sm font-medium ${isActive ? "text-white" : "text-slate-200"}`}>{item.label}</p>
-                                    <p className="truncate text-[11px] text-slate-400">{item.description}</p>
                                 </div>
                                 <span
                                     className={`h-2 w-2 rounded-full transition ${
-                                        isActive ? "bg-cyan-300 shadow-[0_0_18px_rgba(103,232,249,0.7)]" : "bg-transparent"
+                                        isActive ? "bg-cyan-300" : "bg-transparent"
                                     }`}
                                 />
                             </Link>

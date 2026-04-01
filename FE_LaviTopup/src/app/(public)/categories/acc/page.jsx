@@ -15,7 +15,7 @@ export const metadata = {
             "Danh sách tài khoản game tại LaviTopup với bộ lọc rõ ràng, giá hiển thị minh bạch và thao tác xem nhanh.",
         url: `${siteUrl}/categories/acc`,
         siteName: "LaviTopup",
-        images: ["/banner/4e4234e67024d97d7eff34daf88b8448.png"],
+        images: ["/banner/logo.png"],
         locale: "vi_VN",
         type: "website",
     },
@@ -24,7 +24,7 @@ export const metadata = {
         title: "Tài khoản game | LaviTopup",
         description:
             "Danh sách tài khoản game tại LaviTopup với bộ lọc rõ ràng, giá hiển thị minh bạch và thao tác xem nhanh.",
-        images: ["/banner/4e4234e67024d97d7eff34daf88b8448.png"],
+        images: ["/banner/logo.png"],
     },
 };
 
