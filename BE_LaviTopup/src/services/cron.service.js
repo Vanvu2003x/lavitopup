@@ -143,7 +143,9 @@ const initCronJobs = async () => {
 
         try {
             const result = await OrderService.syncAllExternalOrders();
-            console.log(`[Cron] Source sync completed. Scanned: ${result.scanned}, updated: ${result.updated}`);
+            console.log(
+                `[Cron] Source sync completed. Scanned: ${result.scanned}, updated: ${result.updated}, retried: ${result.retried || 0}, resubmitted: ${result.resubmitted || 0}`
+            );
         } catch (error) {
             console.error("[Cron] Source status sync error:", error);
         }

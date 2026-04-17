@@ -1,6 +1,6 @@
 const { db } = require("../../configs/drizzle");
 const { orders, users, topupPackages, games, balanceHistory } = require("../../db/schema");
-const { eq, like, or, and, sql, desc, aliasedTable, inArray, isNotNull } = require("drizzle-orm");
+const { eq, like, or, and, sql, desc, aliasedTable, inArray, isNotNull, isNull } = require("drizzle-orm");
 
 const UserService = require("../user/user.service");
 const { sendOrderSuccessEmail, sendOrderFailureEmail } = require("../../services/nodemailer.service");
@@ -70,6 +70,51 @@ const mapExternalStatus = (status) => {
 
     return "processing";
 };
+
+const resolvePartnerGameApiId = (game, pkg) => {
+    const fileApi = parseAccountInfo(pkg?.fileAPI);
+    const candidateIds = [
+        fileApi?.ownerGameId,
+        fileApi?.gameId,
+        fileApi?.ownerGame?.id,
+        game?.api_id,
+    ];
+
+    for (const candidate of candidateIds) {
+        if (candidate !== undefined && candidate !== null && candidate !== "") {
+            return String(candidate);
+        }
+    }
+
+    return null;
+};
+
+const fetchPendingPartnerOrdersForRetry = async () =>
+    db
+        .select({
+            id: orders.id,
+            api_id: orders.api_id,
+            user_id: orders.user_id,
+            package_id: orders.package_id,
+            amount: orders.amount,
+            quantity: orders.quantity,
+            status: orders.status,
+            account_info: orders.account_info,
+            profit: orders.profit,
+            user_id_nap: orders.user_id_nap,
+            created_at: orders.created_at,
+            updated_at: orders.updated_at,
+        })
+        .from(orders)
+        .innerJoin(topupPackages, eq(orders.package_id, topupPackages.id))
+        .innerJoin(games, eq(topupPackages.game_id, games.id))
+        .where(
+            and(
+                eq(orders.status, "pending"),
+                isNull(orders.api_id),
+                inArray(games.api_source, ["partner", "nguona"])
+            )
+        );
 
 const buildPartnerGameAccountInfo = (game, accountInfo = {}) => {
     const normalizedAccountInfo = parseAccountInfo(accountInfo);
@@ -285,9 +330,15 @@ const OrderService = {
             const partnerAccountInfo = buildPartnerGameAccountInfo(game, accountInfoData || order.account_info);
             const quantity = Number(order.quantity) > 0 ? Number(order.quantity) : 1;
 
+            const partnerGameApiId = resolvePartnerGameApiId(game, pkg);
+            if (!partnerGameApiId) {
+                console.error(`[OrderService] Missing partner game API ID for Order #${order.id}`);
+                return false;
+            }
+
             const res = await ProviderService.createOrder({
                 orderId: order.id,
-                gameApiId: game.api_id,
+                gameApiId: partnerGameApiId,
                 packageApiId: pkg.api_id,
                 accountInfo: partnerAccountInfo,
                 quantity,
@@ -402,8 +453,11 @@ const OrderService = {
             .select({ id: orders.id })
             .from(orders)
             .where(and(inArray(orders.status, ["processing", "partial"]), isNotNull(orders.api_id)));
+        const pendingPartnerOrders = await fetchPendingPartnerOrdersForRetry();
 
         let updated = 0;
+        let retried = 0;
+        let resubmitted = 0;
 
         for (const order of syncableOrders) {
             try {
@@ -416,10 +470,24 @@ const OrderService = {
             }
         }
 
+        for (const order of pendingPartnerOrders) {
+            try {
+                retried += 1;
+                const result = await OrderService.processOrderExternal(order, order.package_id, order.account_info);
+                if (result) {
+                    resubmitted += 1;
+                }
+            } catch (error) {
+                console.error(`[OrderService] Failed to retry pending partner order #${order.id}:`, error.message || error);
+            }
+        }
+
         return {
             status: true,
             scanned: syncableOrders.length,
             updated,
+            retried,
+            resubmitted,
         };
     },
 
