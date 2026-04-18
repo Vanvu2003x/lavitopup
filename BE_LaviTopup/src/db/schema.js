@@ -42,6 +42,8 @@ const games = mysqlTable('games', {
     input_fields: json('input_fields'), // Store external form fields config (IDs for UID, Server, etc.)
     gamecode: varchar('gamecode', { length: 50 }).unique(),
     publisher: varchar('publisher', { length: 50 }),
+    status: varchar('status', { length: 20 }).default('active'), // active, inactive
+    sync_auto_reenable: boolean('sync_auto_reenable').default(false),
     origin_markup_percent: double('origin_markup_percent').default(0), // % markup from API price to origin price
     profit_percent_basic: int('profit_percent_basic').default(0),
     profit_percent_pro: int('profit_percent_pro').default(0),
@@ -69,7 +71,9 @@ const topupPackages = mysqlTable('topup_packages', {
     price_plus: int('price_plus'),   // Price for level 3 (Plus)
     thumbnail: varchar('thumbnail', { length: 500 }),
     package_type: varchar('package_type', { length: 50 }),
+    sort_order: int('sort_order').default(0),
     status: varchar('status', { length: 20 }).default('active'),
+    sync_auto_reenable: boolean('sync_auto_reenable').default(false),
     api_price: int('api_price'),     // Price from supplier API (harga)
     origin_price: int('origin_price'), // Our base price = api_price × (1 + origin_markup%)
     fileAPI: json('fileAPI'),

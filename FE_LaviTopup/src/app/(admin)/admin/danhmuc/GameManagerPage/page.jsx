@@ -16,7 +16,7 @@ import {
 
 const PAGE_SIZE = 8;
 const IMAGE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
-const EMPTY_FORM = { custom_name: "", gamecode: "", publisher: "", origin_markup_percent: 0, is_hot: false, server_text: "" };
+const EMPTY_FORM = { custom_name: "", gamecode: "", publisher: "", origin_markup_percent: 0, is_hot: false, status: "active", server_text: "" };
 
 const clampInterval = (value) => Math.min(59, Math.max(1, Number(value) || 30));
 const imgSrc = (path) => (!path ? null : String(path).startsWith("http") ? path : `${process.env.NEXT_PUBLIC_API_URL}${path}`);
@@ -104,6 +104,7 @@ export default function GameManagerPage() {
             publisher: game.publisher || "",
             origin_markup_percent: game.origin_markup_percent || 0,
             is_hot: Boolean(game.is_hot),
+            status: String(game.status || "active"),
             server_text: Array.isArray(game.server) ? game.server.join(", ") : "",
         });
         setThumbnailFile(null);
@@ -169,6 +170,7 @@ export default function GameManagerPage() {
                     custom_name: formData.custom_name.trim(),
                     gamecode: formData.gamecode.trim(),
                     publisher: formData.publisher.trim(),
+                    status: formData.status,
                     server: formData.server_text
                         .split(",")
                         .map((v) => v.trim())
@@ -271,6 +273,9 @@ export default function GameManagerPage() {
                                     <div className="flex flex-wrap items-center gap-2">
                                         <h2 className="text-base font-semibold text-white">{game.custom_name || game.name}</h2>
                                         {game.is_hot ? <span className="rounded-full border border-amber-300/30 bg-amber-500/10 px-2 py-0.5 text-[11px] text-amber-100">Hot</span> : null}
+                                        <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${String(game.status || "active") === "active" ? "border border-emerald-300/30 bg-emerald-500/10 text-emerald-100" : "border border-slate-500/30 bg-slate-500/10 text-slate-200"}`}>
+                                            {String(game.status || "active") === "active" ? "Đang bật" : "Đang tắt"}
+                                        </span>
                                     </div>
                                     <p className="mt-1 text-xs text-slate-400">{game.gamecode}</p>
                                     <p className="mt-1 text-sm text-slate-300">{game.publisher || "Chưa cập nhật"}</p>
@@ -301,6 +306,16 @@ export default function GameManagerPage() {
                             <button type="button" onClick={closeModal} className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-slate-300"><FiX /></button>
                         </div>
                         <form onSubmit={submitGame} className="space-y-3">
+                            <div className="flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2">
+                                <p className="text-sm text-slate-300">Trạng thái game</p>
+                                <button
+                                    type="button"
+                                    onClick={() => setFormData((p) => ({ ...p, status: p.status === "active" ? "inactive" : "active" }))}
+                                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold ${formData.status === "active" ? "bg-emerald-300 text-slate-950" : "border border-white/10 bg-white/5 text-slate-300"}`}
+                                >
+                                    {formData.status === "active" ? "Đang bật" : "Đang tắt"}
+                                </button>
+                            </div>
                             <div className="grid gap-3 md:grid-cols-2">
                                 <InputField label="Tên hiển thị" value={formData.custom_name} onChange={(v) => setFormData((p) => ({ ...p, custom_name: v }))} placeholder="Liên Quân Mobile" />
                                 <InputField label="Mã game" value={formData.gamecode} onChange={(v) => setFormData((p) => ({ ...p, gamecode: v }))} placeholder="lienquan" />

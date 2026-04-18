@@ -13,7 +13,7 @@ export const metadata = {
         description: "LaviTopup cung cấp topup và tài khoản game với giao diện rõ ràng, dễ thao tác và hỗ trợ trực tiếp khi cần.",
         url: siteUrl,
         siteName: "LaviTopup",
-        images: ["/banner/logo.png"],
+    images: ["/banner/logo.jpg"],
         locale: "vi_VN",
         type: "website",
     },
@@ -21,7 +21,7 @@ export const metadata = {
         card: "summary_large_image",
         title: "LaviTopup | Trang chủ",
         description: "LaviTopup cung cấp topup và tài khoản game với giao diện rõ ràng, dễ thao tác và hỗ trợ trực tiếp khi cần.",
-        images: ["/banner/logo.png"],
+    images: ["/banner/logo.jpg"],
     },
 };
 

@@ -4,6 +4,7 @@ import { getImageSrc } from "@/utils/imageHelper";
 import TopUpClient from "./components/TopUpClient";
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://lavitopup.io.vn";
+const isGameActive = (game) => String(game?.status || "active").toLowerCase() === "active";
 
 export async function generateMetadata(props) {
     const params = await props.params;
@@ -75,7 +76,7 @@ export default async function GameTopUpPage(props) {
 
         listPkg = packagesData || [];
         game = gameData || null;
-        allTopUpGames = Array.isArray(allGamesData) ? allGamesData : [];
+        allTopUpGames = Array.isArray(allGamesData) ? allGamesData.filter(isGameActive) : [];
     } catch (error) {
         console.error("Error fetching data:", error);
     }

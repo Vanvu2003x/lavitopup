@@ -1,0 +1,17 @@
+{
+  "name": "LaviTopup",
+  "short_name": "LaviTopup",
+  "description": "Topup và tài khoản game LaviTopup",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#07142d",
+  "theme_color": "#07142d",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

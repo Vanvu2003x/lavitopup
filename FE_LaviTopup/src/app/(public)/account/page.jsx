@@ -1,35 +1,46 @@
-﻿"use client";
+"use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import {
     FiArrowRight,
     FiCalendar,
     FiCreditCard,
+    FiEye,
+    FiEyeOff,
+    FiKey,
     FiMail,
     FiShield,
     FiShoppingBag,
-    FiTrendingDown,
-    FiTrendingUp,
     FiUser,
 } from "react-icons/fi";
 
-import { getInfo } from "@/services/auth.service";
+import { useToast } from "@/components/ui/Toast";
+import { ForgotPassword, ResetPassword, getInfo } from "@/services/auth.service";
 import { getFinancialSummary } from "@/services/user.service";
 
 const formatCurrency = (value) =>
     `${new Intl.NumberFormat("vi-VN").format(Number(value || 0))} VND`;
 
-function LoadingCard() {
+function LoadingBlock({ height = "h-24" }) {
     return (
-        <div className="surface-card h-40 animate-pulse rounded-[2rem] border border-white/10" />
+        <div className={`surface-card animate-pulse rounded-2xl border border-white/10 ${height}`} />
     );
 }
 
 export default function ProfilePage() {
+    const toast = useToast();
     const [user, setUser] = useState(null);
     const [financials, setFinancials] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [sendingOtp, setSendingOtp] = useState(false);
+    const [updatingPassword, setUpdatingPassword] = useState(false);
+    const [otpSent, setOtpSent] = useState(false);
+    const [otp, setOtp] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [showNewPassword, setShowNewPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -49,31 +60,92 @@ export default function ProfilePage() {
         fetchData();
     }, []);
 
+    const handleSendOtp = async () => {
+        if (!user?.email) {
+            toast.error("Tài khoản chưa có email để nhận OTP");
+            return;
+        }
+
+        setSendingOtp(true);
+        try {
+            await ForgotPassword(user.email);
+            setOtpSent(true);
+            toast.success("Đã gửi OTP về email của bạn");
+        } catch (error) {
+            toast.error("Không thể gửi OTP, vui lòng thử lại");
+        } finally {
+            setSendingOtp(false);
+        }
+    };
+
+    const handleChangePassword = async (event) => {
+        event.preventDefault();
+
+        if (!otp.trim() || !newPassword || !confirmPassword) {
+            toast.error("Vui lòng nhập đầy đủ thông tin");
+            return;
+        }
+
+        if (newPassword.length < 6) {
+            toast.error("Mật khẩu mới cần ít nhất 6 ký tự");
+            return;
+        }
+
+        if (newPassword !== confirmPassword) {
+            toast.error("Mật khẩu nhập lại chưa khớp");
+            return;
+        }
+
+        if (!user?.email) {
+            toast.error("Không tìm thấy email tài khoản");
+            return;
+        }
+
+        setUpdatingPassword(true);
+        try {
+            await ResetPassword(user.email, otp.trim(), newPassword);
+            toast.success("Đổi mật khẩu thành công");
+            setOtp("");
+            setNewPassword("");
+            setConfirmPassword("");
+            setOtpSent(false);
+            setShowNewPassword(false);
+            setShowConfirmPassword(false);
+        } catch (error) {
+            toast.error("OTP không đúng hoặc đã hết hạn");
+        } finally {
+            setUpdatingPassword(false);
+        }
+    };
+
     if (loading) {
         return (
-            <div className="space-y-5 sm:space-y-6">
-                <LoadingCard />
-                <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="space-y-3">
+                <LoadingBlock height="h-36" />
+                <div className="grid gap-3 sm:grid-cols-2">
+                    <LoadingBlock />
+                    <LoadingBlock />
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
                     {[...Array(4)].map((_, index) => (
-                        <LoadingCard key={index} />
+                        <LoadingBlock key={index} />
                     ))}
                 </div>
+                <LoadingBlock height="h-64" />
             </div>
         );
     }
 
     if (!user) {
         return (
-            <div className="surface-card rounded-[2.2rem] p-6 text-center sm:p-8">
-                <p className="text-2xl font-bold text-white sm:text-3xl">
-                    Không tải được thông tin tài khoản
-                </p>
-                <p className="mt-3 text-sm leading-7 text-[#a8c0e4]">
-                    Vui lòng đăng nhập lại để tiếp tục quản lý ví và đơn hàng của bạn.
+            <div className="surface-card rounded-2xl p-6 text-center">
+                <p className="text-xl font-bold text-white">Không tải được thông tin tài khoản</p>
+                <p className="mt-2 text-sm text-[#a8c0e4]">
+                    Vui lòng đăng nhập lại để tiếp tục.
                 </p>
                 <Link
                     href="/auth/login"
-                    className="mt-6 inline-flex items-center gap-2 rounded-full bg-[#53e5c6] px-5 py-3 text-sm font-bold text-[#07142d] transition hover:bg-[#6ff0d5]"
+                    className="mt-4 inline-flex items-center gap-2 rounded-xl bg-[#53e5c6] px-4 py-2.5 text-sm font-semibold text-[#07142d] transition hover:bg-[#6ff0d5]"
                 >
                     Đi tới đăng nhập
                     <FiArrowRight size={16} />
@@ -83,9 +155,7 @@ export default function ProfilePage() {
     }
 
     const roleLabel =
-        String(user.role || "").toLowerCase() === "admin"
-            ? "Quản trị viên"
-            : "Thành viên";
+        String(user.role || "").toLowerCase() === "admin" ? "Quản trị viên" : "Thành viên";
     const joinedAt = user.createdAt || user.created_at;
 
     const infoItems = [
@@ -106,9 +176,7 @@ export default function ProfilePage() {
         },
         {
             label: "Ngày tham gia",
-            value: joinedAt
-                ? new Date(joinedAt).toLocaleDateString("vi-VN")
-                : "Chưa có dữ liệu",
+            value: joinedAt ? new Date(joinedAt).toLocaleDateString("vi-VN") : "Chưa có dữ liệu",
             icon: FiCalendar,
         },
     ];
@@ -117,86 +185,50 @@ export default function ProfilePage() {
         {
             label: "Tổng tiền nạp",
             value: financials?.tong_nap,
-            icon: FiTrendingUp,
-            accent: "text-[#53e5c6]",
-            bg: "bg-[#53e5c6]/12",
         },
         {
             label: "Đã chi tiêu",
             value: financials?.tong_tieu,
-            icon: FiTrendingDown,
-            accent: "text-[#ff8456]",
-            bg: "bg-[#ff8456]/12",
         },
         {
             label: "Nạp tháng này",
             value: financials?.tong_nap_thang,
-            icon: FiCreditCard,
-            accent: "text-[#6ab9ff]",
-            bg: "bg-[#6ab9ff]/12",
         },
         {
-            label: "Chi tiêu tháng này",
+            label: "Chi tháng này",
             value: financials?.tong_tieu_thang,
-            icon: FiShoppingBag,
-            accent: "text-[#f6c15b]",
-            bg: "bg-[#f6c15b]/12",
         },
     ];
 
     return (
-        <div className="space-y-5 sm:space-y-6">
-            <section className="surface-card overflow-hidden rounded-[2.2rem] p-5 sm:rounded-[2.6rem] sm:p-8">
-                <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)] xl:gap-6">
-                    <div className="space-y-5 sm:space-y-6">
-                        <div>
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#53e5c6]">
-                                Tổng quan tài khoản
-                            </p>
-                            <h1 className="mt-3 font-sans text-3xl font-bold tracking-[-0.02em] text-white sm:text-4xl">
-                                Xin chào, {user.name || "bạn"}
-                            </h1>
-                            <p className="mt-3 max-w-2xl text-sm leading-7 text-[#a8c0e4]">
-                                Quản lý ví, theo dõi lịch sử giao dịch và kiểm tra các đơn nạp game
-                                trong cùng một giao diện đồng bộ với trang chủ.
-                            </p>
-                        </div>
+        <div className="space-y-3">
+            <section className="surface-card rounded-2xl p-4 sm:p-5">
+                <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
+                    <div>
+                        <p className="text-[11px] uppercase tracking-[0.14em] text-[#53e5c6]">
+                            Tài khoản
+                        </p>
+                        <h1 className="mt-1.5 text-2xl font-bold text-white">
+                            Xin chào, {user.name || "bạn"}
+                        </h1>
 
-                        <div className="grid gap-3 sm:flex sm:flex-wrap">
-                            <Link
-                                href="/account/nap-tien"
-                                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#ff8456] px-5 py-3 text-sm font-bold text-[#08111f] transition hover:bg-[#ff976f] sm:w-auto"
-                            >
-                                Nạp tiền ngay
-                                <FiArrowRight size={16} />
-                            </Link>
-                            <Link
-                                href="/account/don-hang"
-                                className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-white/12 bg-white/[0.04] px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/[0.08] sm:w-auto"
-                            >
-                                Xem đơn hàng
-                                <FiShoppingBag size={16} />
-                            </Link>
-                        </div>
-
-                        <div className="grid gap-3 sm:grid-cols-2 sm:gap-4">
+                        <div className="mt-4 grid gap-2.5 sm:grid-cols-2">
                             {infoItems.map((item) => {
                                 const Icon = item.icon;
-
                                 return (
                                     <div
                                         key={item.label}
-                                        className="rounded-[1.6rem] border border-white/10 bg-white/[0.04] p-4 sm:rounded-[1.8rem]"
+                                        className="rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2.5"
                                     >
-                                        <div className="flex items-start gap-3">
-                                            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white/[0.06] text-[#53e5c6]">
-                                                <Icon size={18} />
+                                        <div className="flex items-start gap-2.5">
+                                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/[0.06] text-[#53e5c6]">
+                                                <Icon size={15} />
                                             </div>
                                             <div className="min-w-0">
-                                                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8fb5ee]">
+                                                <p className="text-[11px] uppercase tracking-[0.12em] text-[#8fb5ee]">
                                                     {item.label}
                                                 </p>
-                                                <p className="mt-2 break-words text-sm font-semibold leading-6 text-white">
+                                                <p className="mt-1 break-words text-sm font-semibold text-white">
                                                     {item.value}
                                                 </p>
                                             </div>
@@ -207,79 +239,130 @@ export default function ProfilePage() {
                         </div>
                     </div>
 
-                    <div className="glass-panel rounded-[2rem] p-5 sm:rounded-[2.2rem] sm:p-6">
-                        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#53e5c6]">
+                    <div className="rounded-xl border border-white/10 bg-[#071529]/70 p-4">
+                        <p className="text-[11px] uppercase tracking-[0.14em] text-[#8fb5ee]">
                             Số dư hiện tại
                         </p>
-                        <p className="mt-4 break-words text-3xl font-black text-white sm:text-5xl">
+                        <p className="mt-2 break-words text-3xl font-black text-white">
                             {formatCurrency(user.balance)}
                         </p>
-                        <p className="mt-3 text-sm leading-7 text-[#a8c0e4]">
-                            Sử dụng số dư để tạo đơn nạp game nhanh hơn và theo dõi giao dịch rõ ràng
-                            ngay trong tài khoản.
-                        </p>
-
-                        <div className="mt-6 grid gap-3">
-                            <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-4 sm:rounded-[1.6rem]">
-                                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8fb5ee]">
-                                    Tình trạng tài khoản
-                                </p>
-                                <p className="mt-2 text-lg font-bold text-white">Đang hoạt động</p>
-                            </div>
-                            <div className="rounded-[1.5rem] border border-white/10 bg-white/[0.04] p-4 sm:rounded-[1.6rem]">
-                                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8fb5ee]">
-                                    Đi nhanh
-                                </p>
-                                <div className="mt-3 grid gap-2 sm:grid-cols-3 xl:grid-cols-1">
-                                    <Link
-                                        href="/account/lich-su"
-                                        className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-3 text-sm font-semibold text-white transition hover:border-[#53e5c6]/30 hover:text-[#53e5c6]"
-                                    >
-                                        Biến động số dư
-                                    </Link>
-                                    <Link
-                                        href="/account/nap-tien"
-                                        className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-3 text-sm font-semibold text-white transition hover:border-[#53e5c6]/30 hover:text-[#53e5c6]"
-                                    >
-                                        Lịch sử nạp tiền
-                                    </Link>
-                                    <Link
-                                        href="/account/don-hang"
-                                        className="rounded-2xl border border-white/8 bg-white/[0.03] px-3 py-3 text-sm font-semibold text-white transition hover:border-[#53e5c6]/30 hover:text-[#53e5c6]"
-                                    >
-                                        Lịch sử đơn hàng
-                                    </Link>
-                                </div>
-                            </div>
+                        <div className="mt-4 space-y-2">
+                            <Link
+                                href="/account/nap-tien"
+                                className="flex items-center justify-center gap-2 rounded-xl bg-[#ff8456] px-4 py-2.5 text-sm font-semibold text-[#08111f] transition hover:bg-[#ff976f]"
+                            >
+                                Nạp tiền
+                                <FiCreditCard size={16} />
+                            </Link>
+                            <Link
+                                href="/account/don-hang"
+                                className="flex items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-white/[0.08]"
+                            >
+                                Xem đơn hàng
+                                <FiShoppingBag size={16} />
+                            </Link>
                         </div>
                     </div>
                 </div>
             </section>
 
-            <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-                {summaryCards.map((item) => {
-                    const Icon = item.icon;
+            <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                {summaryCards.map((item) => (
+                    <div key={item.label} className="surface-card rounded-xl p-3.5">
+                        <p className="text-[11px] uppercase tracking-[0.12em] text-[#8fb5ee]">
+                            {item.label}
+                        </p>
+                        <p className="mt-1.5 break-words text-base font-bold text-white">
+                            {formatCurrency(item.value)}
+                        </p>
+                    </div>
+                ))}
+            </section>
 
-                    return (
-                        <div key={item.label} className="surface-card rounded-[1.8rem] p-5 sm:rounded-[2rem]">
-                            <div className="flex items-start justify-between gap-4">
-                                <div className="min-w-0">
-                                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8fb5ee]">
-                                        {item.label}
-                                    </p>
-                                    <p className="mt-3 break-words text-2xl font-black text-white">
-                                        {formatCurrency(item.value)}
-                                    </p>
-                                </div>
-                                <div
-                                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${item.bg} ${item.accent}`}
-                                >
-                                    <Icon size={20} />
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
+            <section className="surface-card rounded-2xl p-4 sm:p-5">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                    <div>
+                        <p className="text-[11px] uppercase tracking-[0.14em] text-[#53e5c6]">
+                            Bảo mật
+                        </p>
+                        <h2 className="mt-1 text-xl font-bold text-white">Đổi mật khẩu</h2>
+                        <p className="mt-1.5 text-sm text-[#a8c0e4]">
+                            OTP sẽ được gửi về email: {user.email || "chưa cập nhật"}
+                        </p>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={handleSendOtp}
+                        disabled={sendingOtp}
+                        className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-white/12 bg-white/[0.04] px-4 text-sm font-medium text-white transition hover:bg-white/[0.08] disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                        <FiKey size={15} />
+                        {sendingOtp ? "Đang gửi OTP..." : otpSent ? "Gửi lại OTP" : "Gửi OTP"}
+                    </button>
+                </div>
+
+                <form onSubmit={handleChangePassword} className="mt-4 grid gap-2.5 sm:grid-cols-2">
+                    <input
+                        type="text"
+                        value={otp}
+                        onChange={(event) => setOtp(event.target.value)}
+                        placeholder="Mã OTP (6 số)"
+                        className="h-11 rounded-xl border border-white/12 bg-[#071529]/80 px-3 text-sm text-white outline-none placeholder:text-[#7f9fce] focus:border-[#53e5c6]"
+                    />
+
+                    <div className="relative">
+                        <input
+                            type={showNewPassword ? "text" : "password"}
+                            value={newPassword}
+                            onChange={(event) => setNewPassword(event.target.value)}
+                            placeholder="Mật khẩu mới"
+                            className="h-11 w-full rounded-xl border border-white/12 bg-[#071529]/80 px-3 pr-10 text-sm text-white outline-none placeholder:text-[#7f9fce] focus:border-[#53e5c6]"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowNewPassword((value) => !value)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8fb5ee]"
+                            aria-label="Ẩn/hiện mật khẩu mới"
+                        >
+                            {showNewPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                        </button>
+                    </div>
+
+                    <div className="relative sm:col-span-2">
+                        <input
+                            type={showConfirmPassword ? "text" : "password"}
+                            value={confirmPassword}
+                            onChange={(event) => setConfirmPassword(event.target.value)}
+                            placeholder="Nhập lại mật khẩu mới"
+                            className="h-11 w-full rounded-xl border border-white/12 bg-[#071529]/80 px-3 pr-10 text-sm text-white outline-none placeholder:text-[#7f9fce] focus:border-[#53e5c6]"
+                        />
+                        <button
+                            type="button"
+                            onClick={() => setShowConfirmPassword((value) => !value)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8fb5ee]"
+                            aria-label="Ẩn/hiện nhập lại mật khẩu"
+                        >
+                            {showConfirmPassword ? <FiEyeOff size={16} /> : <FiEye size={16} />}
+                        </button>
+                    </div>
+
+                    <div className="sm:col-span-2 flex flex-wrap items-center gap-2">
+                        <button
+                            type="submit"
+                            disabled={updatingPassword || !otpSent}
+                            className="inline-flex h-10 items-center justify-center rounded-xl bg-[#53e5c6] px-4 text-sm font-semibold text-[#07142d] transition hover:bg-[#6ff0d5] disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {updatingPassword ? "Đang cập nhật..." : "Đổi mật khẩu"}
+                        </button>
+                        <Link
+                            href="/auth/forgot-password"
+                            className="text-sm text-[#8fb5ee] hover:text-white"
+                        >
+                            Quên mật khẩu? Mở trang khôi phục
+                        </Link>
+                    </div>
+                </form>
             </section>
         </div>
     );

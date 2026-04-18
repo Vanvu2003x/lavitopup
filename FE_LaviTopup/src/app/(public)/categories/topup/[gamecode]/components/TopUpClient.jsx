@@ -21,6 +21,18 @@ const LOGIN_FIELD_NAMES = ["username", "account", "password", "pass"];
 const UID_FIELD_NAMES = ["userid", "user_id", "uid", "id", "openid", "playerid", "player_id"];
 const PHONE_FIELD_NAMES = ["phone", "sdt", "zalo", "zalonumber", "zalo_number"];
 const NOTE_FIELD_NAMES = ["note", "ghichu", "ghi_chu"];
+const isGameActive = (game) => String(game?.status || "active").toLowerCase() === "active";
+const sortPackagesByOrder = (items = []) =>
+    [...items].sort((a, b) => {
+        const aSortOrder = Number(a?.sort_order || 0);
+        const bSortOrder = Number(b?.sort_order || 0);
+
+        if (aSortOrder !== bSortOrder) {
+            return aSortOrder - bSortOrder;
+        }
+
+        return Number(a?.price_basic || 0) - Number(b?.price_basic || 0);
+    });
 
 const normalizeFieldName = (value = "") => String(value || "").trim().toLowerCase();
 const isLoginField = (name) => LOGIN_FIELD_NAMES.includes(normalizeFieldName(name));
@@ -195,6 +207,7 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
     const selectedPaymentMethod = walletPaymentMethod;
     const posterSrc = getImageSrc(game?.poster || game?.thumbnail, "/imgs/removed_bg.png");
     const thumbnailSrc = getImageSrc(game?.thumbnail, "/imgs/removed_bg.png");
+    const gameIsActive = isGameActive(game);
 
     useEffect(() => {
         if (game?.server?.length > 0) {
@@ -257,13 +270,20 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
 
     const displayPackages = useMemo(
         () =>
-            rechargeMethod === "uid"
-                ? listPkg.filter((pkg) => pkg.status === "active" && !["log", "login"].includes(pkg.package_type?.toLowerCase()))
-                : listPkg.filter((pkg) => pkg.status === "active" && ["log", "login"].includes(pkg.package_type?.toLowerCase())),
+            sortPackagesByOrder(
+                rechargeMethod === "uid"
+                    ? listPkg.filter((pkg) => pkg.status === "active" && !["log", "login"].includes(pkg.package_type?.toLowerCase()))
+                    : listPkg.filter((pkg) => pkg.status === "active" && ["log", "login"].includes(pkg.package_type?.toLowerCase()))
+            ),
         [listPkg, rechargeMethod]
     );
 
     const handleBuyNow = () => {
+        if (!gameIsActive) {
+            toast.warn("Game hiện đang tắt, vui lòng chọn game khác.");
+            return;
+        }
+
         if (!selectedPkg) {
             toast.warn("Vui lòng chọn gói trước.");
             return;
@@ -303,7 +323,7 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
         setConfirmForm(true);
     };
 
-    const canCheckout = Boolean(selectedPkg);
+    const canCheckout = Boolean(selectedPkg) && gameIsActive;
     const builtAccountInfo = buildPartnerAccountInfo({
         game,
         rechargeMethod,
@@ -420,6 +440,11 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
                                 transition={{ duration: 0.45, delay: 0.18 }}
                                 className="mt-6 flex flex-wrap items-center gap-3"
                             >
+                                {!gameIsActive ? (
+                                    <div className="rounded-full border border-amber-300/25 bg-amber-400/10 px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-amber-100">
+                                        Game đang tắt
+                                    </div>
+                                ) : null}
                                 <div className="inline-flex items-center gap-3 rounded-full border border-white/10 bg-black/25 px-3 py-2 text-sm text-white">
                                     <img src={thumbnailSrc} alt={game?.name || "Game"} className="h-9 w-9 rounded-full object-cover" />
                                     <div className="text-left">
@@ -465,7 +490,7 @@ export default function TopUpClient({ game, listPkg: initialListPkg, allTopUpGam
 
                         <div className="order-3 w-full space-y-4 lg:order-none">
                             <PaymentMethodGrid />
-                            <ImportantNotes rechargeMethod={rechargeMethod} />
+                            <ImportantNotes rechargeMethod={rechargeMethod} game={game} />
                         </div>
                     </div>
 

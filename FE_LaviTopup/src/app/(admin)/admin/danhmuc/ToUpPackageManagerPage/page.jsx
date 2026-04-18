@@ -23,12 +23,13 @@ import {
 import { toast } from "react-toastify";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
-const ADMIN_BANNER = "/banner/logo.png";
+const ADMIN_BANNER = "/banner/logo.jpg";
 const PAGE_SIZE = 8;
 const FILE_TYPES = ["image/jpeg", "image/png", "image/gif", "image/webp"];
 
 const emptyForm = {
-    package_name: "",
+    custom_package_name: "",
+    sort_order: "",
     origin_price: "",
     profit_percent_basic: "",
     profit_percent_pro: "",
@@ -111,8 +112,19 @@ export default function ToUpPackageManagerPage() {
 
     const filteredPackages = useMemo(() => {
         const q = searchTerm.trim().toLowerCase();
-        if (!q) return packages;
-        return packages.filter((pkg) =>
+        const sortedPackages = [...packages].sort((a, b) => {
+            const aSortOrder = Number(a?.sort_order || 0);
+            const bSortOrder = Number(b?.sort_order || 0);
+
+            if (aSortOrder !== bSortOrder) {
+                return aSortOrder - bSortOrder;
+            }
+
+            return Number(a?.price_basic || 0) - Number(b?.price_basic || 0);
+        });
+
+        if (!q) return sortedPackages;
+        return sortedPackages.filter((pkg) =>
             [pkg.package_name, pkg.api_package_name, pkg.custom_package_name]
                 .filter(Boolean)
                 .some((v) => String(v).toLowerCase().includes(q))
@@ -152,7 +164,8 @@ export default function ToUpPackageManagerPage() {
     const openEdit = (pkg) => {
         setCurrentPackage(pkg);
         setFormData({
-            package_name: pkg.package_name || "",
+            custom_package_name: pkg.custom_package_name || pkg.package_name || "",
+            sort_order: pkg.sort_order ?? 0,
             origin_price: pkg.origin_price || "",
             profit_percent_basic: pkg.profit_percent_basic || 0,
             profit_percent_pro: pkg.profit_percent_pro || 0,
@@ -197,7 +210,7 @@ export default function ToUpPackageManagerPage() {
             toast.error("Vui lòng chọn game trước.");
             return;
         }
-        if (!formData.package_name.trim()) {
+        if (!formData.custom_package_name.trim()) {
             toast.warning("Vui lòng nhập tên gói.");
             return;
         }
@@ -210,8 +223,9 @@ export default function ToUpPackageManagerPage() {
             setSubmitting(true);
             const data = new FormData();
 
-            data.append("package_name", formData.package_name.trim());
+            data.append("custom_package_name", formData.custom_package_name.trim());
             data.append("game_id", selectedGame.id);
+            data.append("sort_order", formData.sort_order === "" ? 0 : formData.sort_order);
             data.append("origin_price", formData.origin_price || 0);
             data.append("profit_percent_basic", formData.profit_percent_basic || 0);
             data.append("profit_percent_pro", formData.profit_percent_pro || 0);
@@ -379,6 +393,9 @@ export default function ToUpPackageManagerPage() {
                                 </div>
                                 <div className="min-w-0 flex-1">
                                     <div className="flex flex-wrap items-center gap-2">
+                                        <span className="rounded-full border border-cyan-300/30 bg-cyan-400/10 px-2 py-0.5 text-[11px] font-semibold text-cyan-100">
+                                            STT {Number(pkg.sort_order || 0)}
+                                        </span>
                                         <h2 className="text-base font-semibold text-white">{pkg.package_name}</h2>
                                         {pkg.sale ? (
                                             <span className="rounded-full border border-rose-300/30 bg-rose-500/10 px-2 py-0.5 text-[11px] text-rose-100">
@@ -464,9 +481,15 @@ export default function ToUpPackageManagerPage() {
                             <div className="grid gap-3 md:grid-cols-2">
                                 <FormField
                                     label="Tên gói"
-                                    value={formData.package_name}
-                                    onChange={(v) => setFormData((prev) => ({ ...prev, package_name: v }))}
+                                    value={formData.custom_package_name}
+                                    onChange={(v) => setFormData((prev) => ({ ...prev, custom_package_name: v }))}
                                     placeholder="Gói 1000 Kim Cương"
+                                />
+                                <FormField
+                                    label="STT"
+                                    value={formData.sort_order}
+                                    onChange={(v) => setFormData((prev) => ({ ...prev, sort_order: v }))}
+                                    placeholder="0"
                                 />
                                 <FormField
                                     label="Giá gốc"

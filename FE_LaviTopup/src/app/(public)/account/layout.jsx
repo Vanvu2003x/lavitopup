@@ -9,33 +9,27 @@ export default function AccountLayout({ children }) {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     return (
-        <section className="relative min-h-screen overflow-hidden px-3 py-6 sm:px-6 sm:py-8 lg:px-8 lg:py-10">
-            <div className="pointer-events-none absolute inset-0 -z-10">
-                <div className="absolute left-[-12rem] top-[-8rem] h-[24rem] w-[24rem] rounded-full bg-[#53e5c6]/10 blur-[120px]" />
-                <div className="absolute right-[-12rem] top-[12rem] h-[26rem] w-[26rem] rounded-full bg-[#ff8456]/12 blur-[130px]" />
-                <div className="absolute bottom-[-10rem] left-[10%] h-[22rem] w-[22rem] rounded-full bg-[#6ab9ff]/10 blur-[110px]" />
-            </div>
-
-            <div className="mx-auto max-w-[1360px]">
-                <div className="surface-card mb-5 rounded-[1.8rem] p-4 lg:hidden">
+        <section className="min-h-screen px-3 py-4 sm:px-5 sm:py-5 lg:px-6 lg:py-6">
+            <div className="mx-auto max-w-[1220px]">
+                <div className="surface-card mb-4 rounded-2xl p-3 lg:hidden">
                     <div className="flex items-center justify-between gap-4">
                         <div className="min-w-0">
-                            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#53e5c6]">
+                            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#53e5c6]">
                                 Khu tài khoản
                             </p>
-                            <p className="mt-1 text-sm leading-6 text-[#a8c0e4]">
-                                Quản lý số dư, lịch sử giao dịch và đơn hàng của bạn.
+                            <p className="mt-1 text-xs text-[#a8c0e4]">
+                                Quản lý số dư và đơn hàng.
                             </p>
                         </div>
                         <button
                             type="button"
                             onClick={() => setIsSidebarOpen((value) => !value)}
-                            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/12 bg-white/[0.04] text-white transition hover:bg-white/[0.08]"
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/12 bg-white/[0.04] text-white transition hover:bg-white/[0.08]"
                             aria-label={
                                 isSidebarOpen ? "Đóng menu tài khoản" : "Mở menu tài khoản"
                             }
                         >
-                            {isSidebarOpen ? <FiX size={20} /> : <FiMenu size={20} />}
+                            {isSidebarOpen ? <FiX size={18} /> : <FiMenu size={18} />}
                         </button>
                     </div>
                 </div>
@@ -55,29 +49,27 @@ export default function AccountLayout({ children }) {
                     />
 
                     <div
-                        className={`absolute left-3 right-3 top-20 max-h-[calc(100vh-6rem)] overflow-y-auto transition-all duration-300 sm:left-4 sm:right-4 sm:top-24 ${
-                            isSidebarOpen
-                                ? "translate-y-0 opacity-100"
-                                : "-translate-y-6 opacity-0"
+                        className={`absolute left-3 right-3 top-16 max-h-[calc(100vh-5rem)] overflow-y-auto transition-all duration-200 sm:left-4 sm:right-4 sm:top-20 ${
+                            isSidebarOpen ? "translate-y-0 opacity-100" : "-translate-y-3 opacity-0"
                         }`}
                     >
                         <div className="relative">
                             <button
                                 type="button"
                                 onClick={() => setIsSidebarOpen(false)}
-                                className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-2xl border border-white/12 bg-[#071529]/90 text-white transition hover:bg-[#0c1d38]"
+                                className="absolute right-2.5 top-2.5 z-10 flex h-9 w-9 items-center justify-center rounded-xl border border-white/12 bg-[#071529]/90 text-white transition hover:bg-[#0c1d38]"
                                 aria-label="Đóng khu tài khoản"
                             >
-                                <FiX size={18} />
+                                <FiX size={16} />
                             </button>
                             <Sidebar onNavigate={() => setIsSidebarOpen(false)} />
                         </div>
                     </div>
                 </div>
 
-                <div className="grid gap-5 lg:grid-cols-[280px_minmax(0,1fr)] lg:gap-6 xl:grid-cols-[320px_minmax(0,1fr)]">
+                <div className="grid gap-4 lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-5">
                     <aside className="hidden lg:block">
-                        <div className="sticky top-28">
+                        <div className="sticky top-24">
                             <Sidebar />
                         </div>
                     </aside>

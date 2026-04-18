@@ -4,11 +4,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FiLogOut, FiMenu, FiUser, FiX } from "react-icons/fi";
+import { FiActivity, FiClock, FiLogOut, FiMenu, FiUser, FiX } from "react-icons/fi";
 import { RiWallet3Line } from "react-icons/ri";
 import { Logout, getInfo } from "@/services/auth.service";
 import { getGames } from "@/services/games.service";
 import { useToast } from "@/components/ui/Toast";
+
+const isGameActive = (game) => String(game?.status || "active").toLowerCase() === "active";
 
 export default function Header() {
     const [username, setUsername] = useState("");
@@ -43,8 +45,9 @@ export default function Header() {
         const fetchGamesData = async () => {
             try {
                 const games = await getGames();
-                if (Array.isArray(games) && games.length > 0) {
-                    setFirstGameCode(games[0].gamecode);
+                const activeGames = Array.isArray(games) ? games.filter(isGameActive) : [];
+                if (activeGames.length > 0) {
+                    setFirstGameCode(activeGames[0].gamecode);
                 }
             } catch (error) {
                 console.error("Không thể lấy danh sách game", error);
@@ -197,20 +200,21 @@ export default function Header() {
                         )}
                     </div>
 
-                    <div className="flex items-center gap-2 lg:hidden">
+                    <div className="flex min-w-0 items-center gap-2 lg:hidden">
                         {username ? (
-                            <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] p-1 shadow-inner">
+                            <div className="flex min-w-0 items-center rounded-full border border-white/10 bg-white/[0.04] p-1 shadow-inner">
                                 <button
                                     type="button"
                                     onClick={goWallet}
-                                    className="flex h-9 items-center gap-1.5 rounded-full bg-[#53e5c6] px-3 text-[11px] font-bold text-[#07142d] transition active:scale-95"
+                                    className="flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-[#53e5c6] px-3 text-[11px] font-bold text-[#07142d] transition active:scale-95"
                                 >
                                     <RiWallet3Line size={14} />
                                     <span>{formatBalance(balance)} đ</span>
                                 </button>
                                 <Link
                                     href="/account"
-                                    className="px-2 text-[11px] font-bold text-white line-clamp-1 max-w-[70px]"
+                                    title={username}
+                                    className="ml-1 block max-w-[96px] truncate rounded-full px-2 py-1 text-xs font-semibold text-white/95 transition hover:bg-white/10"
                                 >
                                     {username}
                                 </Link>
@@ -230,7 +234,7 @@ export default function Header() {
                         <button
                             type="button"
                             onClick={() => setOpenMobileMenu(true)}
-                            className="flex h-10 w-10 items-center justify-center rounded-[1rem] border border-white/12 bg-white/[0.05] text-white transition active:scale-95"
+                            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[1rem] border border-white/12 bg-white/[0.05] text-white transition active:scale-95"
                             aria-label="Mở menu"
                         >
                             <FiMenu size={18} />
@@ -271,6 +275,27 @@ export default function Header() {
                         <p className="mt-2 text-2xl font-black text-white">{formatBalance(balance)} VND</p>
                         <p className="mt-1 text-sm text-[#9db3d8]">Điều hướng nhanh tới nạp tiền và tài khoản.</p>
                     </div>
+
+                    {username ? (
+                        <div className="mt-3 grid grid-cols-2 gap-2">
+                            <Link
+                                href="/account/don-hang"
+                                onClick={closeMobileMenu}
+                                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] font-semibold text-[#cfe0f7] transition hover:bg-white/[0.08]"
+                            >
+                                <FiClock size={13} className="shrink-0 text-[#53e5c6]" />
+                                <span className="truncate">Lịch sử đơn hàng</span>
+                            </Link>
+                            <Link
+                                href="/account/lich-su"
+                                onClick={closeMobileMenu}
+                                className="flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.03] px-3 py-2 text-[11px] font-semibold text-[#cfe0f7] transition hover:bg-white/[0.08]"
+                            >
+                                <FiActivity size={13} className="shrink-0 text-[#53e5c6]" />
+                                <span className="truncate">Biến động số dư</span>
+                            </Link>
+                        </div>
+                    ) : null}
 
                     <div className="mt-6 space-y-2">
                         <button

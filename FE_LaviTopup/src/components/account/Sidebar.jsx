@@ -1,12 +1,11 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-    FiCreditCard,
     FiClock,
-    FiHome,
+    FiCreditCard,
     FiLogOut,
     FiShoppingBag,
     FiUser,
@@ -72,44 +71,33 @@ export default function Sidebar({ onNavigate }) {
     };
 
     return (
-        <div className="glass-panel overflow-hidden rounded-[2rem] border border-white/12 p-4 shadow-[0_24px_80px_rgba(3,10,28,0.3)] sm:rounded-[2.2rem]">
-            <div className="rounded-[1.7rem] border border-white/10 bg-white/[0.04] p-4 sm:rounded-[1.8rem] sm:p-5">
-                <div className="flex items-center gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-[1.4rem] bg-[linear-gradient(135deg,#53e5c6_0%,#6ab9ff_100%)] text-2xl font-black text-[#07142d] shadow-[0_16px_30px_rgba(83,229,198,0.18)] sm:h-16 sm:w-16 sm:rounded-[1.6rem]">
+        <div className="surface-card overflow-hidden rounded-2xl border border-white/10 p-3 sm:p-4">
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-3">
+                <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#53e5c6]/20 text-sm font-black text-[#53e5c6]">
                         {String(user?.name || "L").charAt(0).toUpperCase()}
                     </div>
-
                     <div className="min-w-0">
-                        <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[#53e5c6]">
-                            Tài khoản
-                        </p>
-                        <p className="mt-1 truncate text-base font-bold text-white sm:text-lg">
+                        <p className="truncate text-sm font-semibold text-white">
                             {user?.name || "LaviTopup"}
                         </p>
-                        <p className="truncate text-sm text-[#9fb7da]">
-                            {user?.email || "Đăng nhập để đồng bộ dữ liệu"}
+                        <p className="truncate text-xs text-[#9fb7da]">
+                            {user?.email || "Chưa có email"}
                         </p>
                     </div>
                 </div>
 
-                <div className="mt-5 rounded-[1.4rem] border border-white/10 bg-[#071529]/70 p-4 sm:rounded-[1.5rem]">
-                    <div className="flex items-center justify-between gap-3">
-                        <div className="min-w-0">
-                            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#8fb5ee]">
-                                Số dư khả dụng
-                            </p>
-                            <p className="mt-2 break-words text-lg font-black text-white sm:text-xl">
-                                {formatCurrency(user?.balance)}
-                            </p>
-                        </div>
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#53e5c6]/14 text-[#53e5c6]">
-                            <FiHome size={20} />
-                        </div>
-                    </div>
+                <div className="mt-3 rounded-lg border border-white/10 bg-[#071529]/70 p-3">
+                    <p className="text-[11px] uppercase tracking-[0.12em] text-[#8fb5ee]">
+                        Số dư khả dụng
+                    </p>
+                    <p className="mt-1 break-words text-base font-bold text-white">
+                        {formatCurrency(user?.balance)}
+                    </p>
                 </div>
             </div>
 
-            <div className="mt-4 grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
+            <div className="mt-3 space-y-2">
                 {menuItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = pathname === item.path;
@@ -119,38 +107,43 @@ export default function Sidebar({ onNavigate }) {
                             key={item.path}
                             href={item.path}
                             onClick={onNavigate}
-                            className={`group flex items-center gap-3 rounded-[1.4rem] border px-4 py-3.5 text-sm font-semibold transition sm:rounded-[1.5rem] ${
+                            className={`flex items-center gap-2.5 rounded-xl border px-3 py-2.5 text-sm transition ${
                                 isActive
-                                    ? "border-[#53e5c6]/30 bg-[#53e5c6]/12 text-white shadow-[0_12px_28px_rgba(83,229,198,0.08)]"
-                                    : "border-white/8 bg-white/[0.03] text-[#c4d8f7] hover:border-white/14 hover:bg-white/[0.06] hover:text-white"
+                                    ? "border-[#53e5c6]/30 bg-[#53e5c6]/10 text-white"
+                                    : "border-white/10 bg-white/[0.02] text-[#c4d8f7] hover:bg-white/[0.05] hover:text-white"
                             }`}
                         >
                             <span
-                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl transition ${
+                                className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
                                     isActive
                                         ? "bg-[#53e5c6] text-[#07142d]"
-                                        : "bg-white/[0.05] text-[#8fb5ee] group-hover:text-[#53e5c6]"
+                                        : "bg-white/[0.06] text-[#8fb5ee]"
                                 }`}
                             >
-                                <Icon size={18} />
+                                <Icon size={16} />
                             </span>
-                            <span className="min-w-0 leading-6">{item.name}</span>
+                            <span className="min-w-0 truncate">{item.name}</span>
                         </Link>
                     );
                 })}
             </div>
 
-            <div className="mt-4 border-t border-white/10 pt-4">
+            <div className="mt-3 border-t border-white/10 pt-3">
                 <button
                     type="button"
                     onClick={handleLogout}
-                    className="flex w-full items-center gap-3 rounded-[1.4rem] border border-[#ff8456]/20 bg-[#ff8456]/10 px-4 py-3.5 text-sm font-semibold text-[#ffb89d] transition hover:border-[#ff8456]/40 hover:bg-[#ff8456]/16 hover:text-white sm:rounded-[1.5rem]"
+                    className="flex w-full items-center gap-2.5 rounded-xl border border-[#ff8456]/20 bg-[#ff8456]/10 px-3 py-2.5 text-sm text-[#ffb89d] transition hover:border-[#ff8456]/40 hover:text-white"
                 >
-                    <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-[#ff8456]/16 text-[#ff8456]">
-                        <FiLogOut size={18} />
+                    <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#ff8456]/20 text-[#ff8456]">
+                        <FiLogOut size={16} />
                     </span>
                     <span>Đăng xuất</span>
                 </button>
+            </div>
+
+            <div className="mt-3 flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.02] px-3 py-2 text-[11px] text-[#8fb5ee]">
+                <FiCreditCard size={14} />
+                <span>Tài khoản được đồng bộ theo thời gian thực.</span>
             </div>
         </div>
     );

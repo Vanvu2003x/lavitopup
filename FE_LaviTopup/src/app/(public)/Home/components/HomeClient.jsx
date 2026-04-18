@@ -29,9 +29,10 @@ const sectionLabelClass = "font-sans text-xs font-semibold uppercase tracking-[0
 const sectionTitleClass = "mt-2 font-sans text-3xl font-bold tracking-[-0.02em] text-white sm:text-4xl";
 const cardTitleClass = "mt-2 font-sans text-[1.7rem] font-bold tracking-[-0.02em] text-white";
 const sectionTextClass = "mt-3 max-w-2xl font-sans text-sm leading-7 text-[#a8c0e4]";
+const isGameActive = (game) => String(game?.status || "active").toLowerCase() === "active";
 
 export default function HomeClient({ games: initialGames = [] }) {
-    const [games, setGames] = useState(initialGames);
+    const [games, setGames] = useState(initialGames.filter(isGameActive));
     const [loading, setLoading] = useState(initialGames.length === 0);
     const [searchTerm, setSearchTerm] = useState("");
 
@@ -40,7 +41,7 @@ export default function HomeClient({ games: initialGames = [] }) {
             try {
                 setLoading(true);
                 const data = await getGames();
-                setGames(Array.isArray(data) ? data : []);
+                setGames((Array.isArray(data) ? data : []).filter(isGameActive));
             } catch (error) {
                 console.error("Không thể tải danh sách game:", error);
                 if (initialGames.length > 0) {
@@ -63,7 +64,7 @@ export default function HomeClient({ games: initialGames = [] }) {
         const gameName = String(game?.name || "").toLowerCase();
         const publisher = String(game?.publisher || "").toLowerCase();
 
-        return gameName.includes(query) || publisher.includes(query);
+        return isGameActive(game) && (gameName.includes(query) || publisher.includes(query));
     });
 
     return (

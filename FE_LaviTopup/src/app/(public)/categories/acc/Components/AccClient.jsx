@@ -10,6 +10,8 @@ import { FiSearch, FiFilter, FiDollarSign, FiShoppingBag, FiGrid, FiList, FiChev
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 
+const isGameActive = (game) => String(game?.status || "active").toLowerCase() === "active"
+
 export default function AccClient({ gamecode }) {
     const baseURLAPI = process.env.NEXT_PUBLIC_API_URL
     const router = useRouter()
@@ -42,7 +44,7 @@ export default function AccClient({ gamecode }) {
         const fetchGames = async () => {
             try {
                 const gamesData = await getGames()
-                setGames(gamesData || [])
+                setGames((Array.isArray(gamesData) ? gamesData : []).filter(isGameActive))
             } catch (error) {
                 console.error("Failed to fetch games list", error)
             }

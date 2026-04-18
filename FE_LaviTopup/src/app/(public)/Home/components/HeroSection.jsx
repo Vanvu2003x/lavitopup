@@ -39,7 +39,7 @@ export default function HeroSection() {
                     <div className="rise-up">
                         <div className="overflow-hidden rounded-[2.1rem] border border-white/5 shadow-2xl">
                             <img
-                                src="/banner/logo.png"
+            src="/banner/logo.jpg"
                                 alt="Banner game LaviTopup"
                                 className="w-full object-cover transition duration-700 hover:scale-105 sm:min-h-[300px] lg:min-h-[360px]"
                             />

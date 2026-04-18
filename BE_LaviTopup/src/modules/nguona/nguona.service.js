@@ -138,15 +138,75 @@ const buildPackageFileApi = (game, remotePackage) => ({
     sortOrder: remotePackage?.sortOrder ?? null,
 });
 
+const resolvePackageSortOrder = (existingPackage, remotePackage) => {
+    if (existingPackage?.sort_order !== undefined && existingPackage?.sort_order !== null) {
+        return toNumber(existingPackage.sort_order, 0);
+    }
+
+    return toNumber(remotePackage?.sortOrder, 0);
+};
+
+const toPlainObject = (value) =>
+    value && typeof value === "object" && !Array.isArray(value) ? { ...value } : {};
+
+const mergeFileApiForSync = (existingFileApi, remoteFileApi) => {
+    const existing = toPlainObject(existingFileApi);
+    const remote = toPlainObject(remoteFileApi);
+    const adminMeta = toPlainObject(existing?._admin);
+
+    if (Object.keys(adminMeta).length === 0) {
+        return remote;
+    }
+
+    return {
+        ...remote,
+        _admin: adminMeta,
+    };
+};
+
 const computePriceFromPercent = (originPrice, percent) =>
     Math.max(0, Math.ceil(toNumber(originPrice, 0) * (1 + toNumber(percent, 0) / 100)));
 
+const hasAdminPriceOverride = (existingPackage) =>
+    Boolean(existingPackage?.fileAPI && existingPackage.fileAPI?._admin?.priceOverride);
+
 const buildPricing = (game, existingPackage, remotePackage) => {
     const apiPrice = buildApiPrice(resolveRemotePackagePrice(remotePackage));
-    const originPrice = Math.ceil(apiPrice * getMarkupCoefficient(game));
     const percentBasic = resolveNumber(existingPackage?.profit_percent_basic, 0);
     const percentPro = resolveNumber(existingPackage?.profit_percent_pro, 0);
     const percentPlus = resolveNumber(existingPackage?.profit_percent_plus, 0);
+
+    if (hasAdminPriceOverride(existingPackage)) {
+        const originPrice = resolveNumber(existingPackage?.origin_price, 0);
+        const priceBasic =
+            existingPackage?.price_basic !== undefined && existingPackage?.price_basic !== null
+                ? resolveNumber(existingPackage.price_basic, 0)
+                : computePriceFromPercent(originPrice, percentBasic);
+        const pricePro =
+            existingPackage?.price_pro !== undefined && existingPackage?.price_pro !== null
+                ? resolveNumber(existingPackage.price_pro, 0)
+                : computePriceFromPercent(originPrice, percentPro);
+        const pricePlus =
+            existingPackage?.price_plus !== undefined && existingPackage?.price_plus !== null
+                ? resolveNumber(existingPackage.price_plus, 0)
+                : computePriceFromPercent(originPrice, percentPlus);
+        const fallbackPrice = resolveNumber(existingPackage?.price, priceBasic);
+
+        return {
+            api_price: apiPrice,
+            origin_price: originPrice,
+            price_basic: priceBasic,
+            price_pro: pricePro,
+            price_plus: pricePlus,
+            price: fallbackPrice,
+            profit_percent_basic: percentBasic,
+            profit_percent_pro: percentPro,
+            profit_percent_plus: percentPlus,
+            profit_percent_user: existingPackage?.profit_percent_user || 0,
+        };
+    }
+
+    const originPrice = Math.ceil(apiPrice * getMarkupCoefficient(game));
 
     const priceBasic = computePriceFromPercent(originPrice, percentBasic);
     const pricePro = computePriceFromPercent(originPrice, percentPro);
@@ -261,6 +321,8 @@ const upsertRemoteGame = async (remoteGame) => {
         custom_name: existing?.custom_name || null,
         name: resolvedName,
         gamecode,
+        status: existing?.status || "inactive",
+        sync_auto_reenable: existing?.sync_auto_reenable || false,
         server: Array.isArray(remoteGame?.servers) ? remoteGame.servers : existing?.server || [],
         input_fields: inputFields,
         api_thumbnail: apiThumbnail,
@@ -293,6 +355,8 @@ const upsertRemoteGame = async (remoteGame) => {
     const newGame = {
         id: randomUUID(),
         ...payload,
+        status: "inactive",
+        sync_auto_reenable: true,
     };
 
     await db.insert(games).values(newGame);
@@ -451,6 +515,7 @@ const ProviderService = {
                 Array.isArray(gamesToSync) && gamesToSync.length > 0
                     ? gamesToSync
                     : await db.select().from(games).where(eq(games.api_source, SOURCE_CODE));
+            const syncedGameIds = new Set(syncedGames.map((game) => game.id));
             let totalPackages = 0;
             let deactivatedCount = 0;
             let reactivatedCount = 0;
@@ -494,27 +559,53 @@ const ProviderService = {
                         }
                         const existingPackage = await findExistingPackage(game.id, apiId, packageName);
                         const pricing = buildPricing(game, existingPackage, remotePackage);
-                        const fileAPI = buildPackageFileApi(game, remotePackage);
-                        const resolvedPackageName =
-                            existingPackage?.custom_package_name || packageName;
+                        const fileAPI = mergeFileApiForSync(
+                            existingPackage?.fileAPI,
+                            buildPackageFileApi(game, remotePackage)
+                        );
+                        const inferredCustomName =
+                            existingPackage?.custom_package_name ||
+                            (
+                                existingPackage?.package_name &&
+                                existingPackage?.api_package_name &&
+                                existingPackage.package_name !== existingPackage.api_package_name
+                            ? existingPackage.package_name
+                            : null
+                            );
+                        const resolvedPackageName = inferredCustomName || packageName;
                         const nextStatus = remotePackage?.isActive === false ? "inactive" : "active";
                         const shouldReactivate =
-                            existingPackage?.status === "inactive" && nextStatus === "active";
+                            existingPackage?.status === "inactive" &&
+                            existingPackage?.sync_auto_reenable === true &&
+                            nextStatus === "active";
+                        const resolvedStatus =
+                            nextStatus === "active" &&
+                            existingPackage?.status === "inactive" &&
+                            existingPackage?.sync_auto_reenable !== true
+                                ? "inactive"
+                                : nextStatus;
+                        const resolvedAutoReenable = existingPackage
+                            ? resolvedStatus === "inactive" && existingPackage?.status === "active"
+                                ? true
+                                : existingPackage?.sync_auto_reenable || false
+                            : resolvedStatus === "inactive";
 
                         const payload = {
                             api_id: apiId,
                             game_id: game.id,
                             api_package_name: packageName,
-                            custom_package_name: existingPackage?.custom_package_name || null,
+                            custom_package_name: inferredCustomName,
                             package_name: resolvedPackageName,
                             package_type: existingPackage?.package_type || packageType,
+                            sort_order: resolvePackageSortOrder(existingPackage, remotePackage),
                             thumbnail:
                                 remotePackage?.thumbnailUrl ||
                                 remotePackage?.thumbnail ||
                                 existingPackage?.thumbnail ||
                                 game?.thumbnail ||
                                 null,
-                            status: nextStatus,
+                            status: resolvedStatus,
+                            sync_auto_reenable: resolvedAutoReenable,
                             sale: existingPackage?.sale || false,
                             id_server:
                                 existingPackage?.id_server !== undefined && existingPackage?.id_server !== null
@@ -530,16 +621,18 @@ const ProviderService = {
                                 .set({
                                     api_id: apiId || existingPackage.api_id,
                                     api_package_name: packageName,
-                                    custom_package_name: existingPackage.custom_package_name || null,
+                                    custom_package_name: inferredCustomName,
                                     package_name: resolvedPackageName,
                                     package_type: existingPackage.package_type || packageType,
+                                    sort_order: resolvePackageSortOrder(existingPackage, remotePackage),
                                     thumbnail:
                                         remotePackage?.thumbnailUrl ||
                                         remotePackage?.thumbnail ||
                                         existingPackage.thumbnail ||
                                         game?.thumbnail ||
                                         null,
-                                    status: nextStatus,
+                                    status: resolvedStatus,
+                                    sync_auto_reenable: resolvedAutoReenable,
                                     sale: existingPackage.sale || false,
                                     id_server:
                                         existingPackage.id_server !== undefined && existingPackage.id_server !== null
@@ -569,6 +662,7 @@ const ProviderService = {
                             api_package_name: topupPackages.api_package_name,
                             package_name: topupPackages.package_name,
                             status: topupPackages.status,
+                            sync_auto_reenable: topupPackages.sync_auto_reenable,
                         })
                         .from(topupPackages)
                         .where(eq(topupPackages.game_id, game.id));
@@ -586,7 +680,7 @@ const ProviderService = {
                         if (localPackage.status !== "inactive") {
                             await db
                                 .update(topupPackages)
-                                .set({ status: "inactive" })
+                                .set({ status: "inactive", sync_auto_reenable: true })
                                 .where(eq(topupPackages.id, localPackage.id));
                             gameDeactivatedCount += 1;
                             deactivatedCount += 1;
@@ -616,6 +710,56 @@ const ProviderService = {
                         success: false,
                         error: error.message,
                     });
+                }
+            }
+
+            const localSourceGames = await db
+                .select({
+                    id: games.id,
+                    gamecode: games.gamecode,
+                    status: games.status,
+                    sync_auto_reenable: games.sync_auto_reenable,
+                })
+                .from(games)
+                .where(eq(games.api_source, SOURCE_CODE));
+
+            for (const localGame of localSourceGames) {
+                if (!syncedGameIds.has(localGame.id)) {
+                    if (localGame.status !== "inactive") {
+                        await db
+                            .update(games)
+                            .set({ status: "inactive", sync_auto_reenable: true })
+                            .where(eq(games.id, localGame.id));
+                    }
+
+                    await db
+                        .update(topupPackages)
+                        .set({ status: "inactive", sync_auto_reenable: true })
+                        .where(eq(topupPackages.game_id, localGame.id));
+                    continue;
+                }
+
+                const localPackages = await db
+                    .select({
+                        status: topupPackages.status,
+                    })
+                    .from(topupPackages)
+                    .where(eq(topupPackages.game_id, localGame.id));
+
+                const activePackageCount = localPackages.filter((pkg) => pkg.status === "active").length;
+
+                if (activePackageCount === 0) {
+                    if (localGame.status !== "inactive") {
+                        await db
+                            .update(games)
+                            .set({ status: "inactive", sync_auto_reenable: true })
+                            .where(eq(games.id, localGame.id));
+                    }
+                } else if (localGame.status === "inactive" && localGame.sync_auto_reenable === true) {
+                    await db
+                        .update(games)
+                        .set({ status: "active", sync_auto_reenable: false })
+                        .where(eq(games.id, localGame.id));
                 }
             }
 

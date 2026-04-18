@@ -29,7 +29,7 @@ const orgJsonLd = {
     "@type": "Organization",
     name: "LaviTopup",
     url: siteUrl,
-    logo: `${siteUrl}/banner/logo.png`,
+    logo: `${siteUrl}/banner/logo.jpg`,
     sameAs: ["https://www.facebook.com/messages/e2ee/t/1484722313227044"],
 };
 

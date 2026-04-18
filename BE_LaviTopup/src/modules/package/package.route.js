@@ -16,6 +16,7 @@ router.get('/:id', PackageController.getPackageById);
 router.post('/', checkRoleMDW, upload.secureUpload("thumbnail"), PackageController.createTopupPackage);
 router.put('/', checkRoleMDW, upload.secureUpload("thumbnail"), PackageController.updateTopupPackage);
 router.delete('/:id', checkRoleMDW, PackageController.deleteTopupPackage);
+router.patch('/status', checkRoleMDW, PackageController.updateStatus);
 router.patch('/update-status', checkRoleMDW, PackageController.updateStatus);
 router.patch('/update-sale', checkRoleMDW, PackageController.updateSale);
 

@@ -22,6 +22,19 @@ const normalizeServerList = (value) => {
         .filter(Boolean);
 };
 
+const normalizeStatus = (value, fallback = "active") => {
+    if (value === undefined || value === null || value === "") {
+        return fallback;
+    }
+
+    const normalized = String(value).trim().toLowerCase();
+    if (["active", "inactive"].includes(normalized)) {
+        return normalized;
+    }
+
+    return fallback;
+};
+
 const toBoolean = (value) => {
     if (typeof value === "string") {
         const normalized = value.trim().toLowerCase();
@@ -33,6 +46,34 @@ const toBoolean = (value) => {
 
 const resolveDisplayName = (game) => game?.custom_name || game?.api_name || game?.name || null;
 const resolveDisplayThumbnail = (game) => game?.custom_thumbnail || game?.api_thumbnail || game?.thumbnail || null;
+const normalizeMlbbKey = (value) => String(value || "").trim().toLowerCase();
+
+const isMlbbGame = (game) => {
+    const gamecode = normalizeMlbbKey(game?.gamecode);
+    const apiId = normalizeMlbbKey(game?.api_id);
+    const name = normalizeMlbbKey(resolveDisplayName(game));
+
+    if (gamecode === "mlbb" || gamecode === "mobilelegends") {
+        return true;
+    }
+
+    if (apiId === "1") {
+        return true;
+    }
+
+    return name.includes("mobile legend") || name.includes("mobilelegends");
+};
+
+const sortGamesWithMlbbFirst = (items = []) =>
+    [...items].sort((a, b) => {
+        const aIsMlbb = isMlbbGame(a);
+        const bIsMlbb = isMlbbGame(b);
+
+        if (aIsMlbb && !bIsMlbb) return -1;
+        if (!aIsMlbb && bIsMlbb) return 1;
+
+        return 0;
+    });
 
 const hydrateGame = (game) => {
     if (!game) {
@@ -103,7 +144,7 @@ const buildResolvedGamePayload = (data = {}, currentGame = null) => {
 const GameService = {
     getAllGames: async () => {
         const result = await db.select().from(games);
-        return result.map(hydrateGame);
+        return sortGamesWithMlbbFirst(result.map(hydrateGame));
     },
 
     getGameById: async (id) => {
@@ -130,6 +171,8 @@ const GameService = {
             input_fields: Array.isArray(data.input_fields) ? data.input_fields : [],
             gamecode: normalizeString(data.gamecode, 50),
             publisher: normalizeString(data.publisher, 50) || null,
+            status: normalizeStatus(data.status, "active"),
+            sync_auto_reenable: false,
             profit_percent_basic: data.profit_percent_basic || 0,
             profit_percent_pro: data.profit_percent_pro || 0,
             profit_percent_plus: data.profit_percent_plus || 0,
@@ -170,6 +213,10 @@ const GameService = {
         if (data.input_fields !== undefined) updateData.input_fields = Array.isArray(data.input_fields) ? data.input_fields : [];
         if (data.gamecode !== undefined) updateData.gamecode = normalizeString(data.gamecode, 50);
         if (data.publisher !== undefined) updateData.publisher = normalizeString(data.publisher, 50) || null;
+        if (data.status !== undefined) {
+            updateData.status = normalizeStatus(data.status, currentGame.status || "active");
+            updateData.sync_auto_reenable = false;
+        }
         if (data.is_hot !== undefined) updateData.is_hot = toBoolean(data.is_hot);
 
         let profitChanged = false;
@@ -213,7 +260,11 @@ const GameService = {
                 .where(eq(topupPackages.package_type, type));
         }
 
-        return result.map((row) => hydrateGame(row.games || row));
+        return sortGamesWithMlbbFirst(
+            result
+                .map((row) => hydrateGame(row.games || row))
+                .filter((game) => game?.status === "active")
+        );
     },
 
     getTopUpGames: async () => {
@@ -221,7 +272,11 @@ const GameService = {
             .innerJoin(topupPackages, eq(topupPackages.game_id, games.id))
             .where(eq(topupPackages.status, "active"));
 
-        return result.map((row) => hydrateGame(row.games || row));
+        return sortGamesWithMlbbFirst(
+            result
+                .map((row) => hydrateGame(row.games || row))
+                .filter((game) => game?.status === "active")
+        );
     },
 };
 

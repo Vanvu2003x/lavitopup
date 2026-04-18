@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const multer = require('multer');
 
 const uploadsDir = path.join(__dirname, '..', 'uploads');
+const MAX_UPLOAD_SIZE_BYTES = 100 * 1024 * 1024; // 100MB
 
 const ensureUploadsDir = () => {
     if (!fs.existsSync(uploadsDir)) {
@@ -51,7 +52,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({
     storage,
-    limits: { fileSize: 5 * 1024 * 1024 },
+    limits: { fileSize: MAX_UPLOAD_SIZE_BYTES },
     fileFilter
 });
 
@@ -60,6 +61,11 @@ const secureUpload = (fieldName) => {
         upload.single(fieldName)(req, res, (err) => {
             if (err) {
                 console.error('[UPLOAD ERROR]', err.message);
+                if (err.code === 'LIMIT_FILE_SIZE') {
+                    return res
+                        .status(413)
+                        .json({ status: false, message: 'Kích thước file tối đa là 100MB' });
+                }
                 return res.status(400).json({ status: false, message: err.message });
             }
 
@@ -77,6 +83,11 @@ const secureUploadFields = (fields) => {
         upload.fields(fields)(req, res, (err) => {
             if (err) {
                 console.error('[UPLOAD ERROR]', err.message);
+                if (err.code === 'LIMIT_FILE_SIZE') {
+                    return res
+                        .status(413)
+                        .json({ status: false, message: 'Kích thước file tối đa là 100MB' });
+                }
                 return res.status(400).json({ status: false, message: err.message });
             }
 

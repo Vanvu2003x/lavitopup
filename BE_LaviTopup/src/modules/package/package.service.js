@@ -63,6 +63,23 @@ const normalizeStatus = (value, fallback = "active") => {
 const computePriceFromPercent = (originPrice, percent) =>
     Math.max(0, Math.ceil(Number(originPrice || 0) * (1 + Number(percent || 0) / 100)));
 
+const toObject = (value) =>
+    value && typeof value === "object" && !Array.isArray(value) ? { ...value } : {};
+
+const withAdminPriceOverrideMeta = (fileAPI, enabled = true) => {
+    const fileApiObject = toObject(fileAPI);
+    const adminMeta = toObject(fileApiObject._admin);
+
+    return {
+        ...fileApiObject,
+        _admin: {
+            ...adminMeta,
+            priceOverride: Boolean(enabled),
+            priceOverrideUpdatedAt: new Date().toISOString(),
+        },
+    };
+};
+
 const resolveDisplayName = (pkg) =>
     pkg?.custom_package_name || pkg?.api_package_name || pkg?.package_name || null;
 
@@ -81,6 +98,12 @@ const buildNameFields = (data = {}, currentPkg = null) => {
     const nextApiName = normalizeString(data.api_package_name, 255);
     const nextCustomName = normalizeString(data.custom_package_name, 255);
     const fallbackName = normalizeString(data.package_name, 255);
+    const hasLegacyPackageNameInput = data.package_name !== undefined;
+    const hasCustomNameInput = data.custom_package_name !== undefined;
+    const shouldMapLegacyNameToCustom =
+        Boolean(currentPkg?.api_package_name) &&
+        hasLegacyPackageNameInput &&
+        !hasCustomNameInput;
 
     const apiPackageName =
         nextApiName !== undefined
@@ -90,6 +113,8 @@ const buildNameFields = (data = {}, currentPkg = null) => {
     const customPackageName =
         nextCustomName !== undefined
             ? nextCustomName
+            : shouldMapLegacyNameToCustom
+                ? fallbackName
             : currentPkg
                 ? currentPkg.custom_package_name
                 : null;
@@ -138,9 +163,15 @@ const buildPricingFields = (data = {}, currentPkg = null) => {
     };
 };
 
+const packageOrderBy = [
+    asc(topupPackages.sort_order),
+    asc(topupPackages.price_basic),
+    asc(topupPackages.package_name),
+];
+
 const PackageService = {
     getAllPackages: async () => {
-        const result = await db.select().from(topupPackages).orderBy(asc(topupPackages.price_basic));
+        const result = await db.select().from(topupPackages).orderBy(...packageOrderBy);
         return result.map(hydratePackage);
     },
 
@@ -172,6 +203,7 @@ const PackageService = {
                 api_price: topupPackages.api_price,
                 thumbnail: topupPackages.thumbnail,
                 package_type: topupPackages.package_type,
+                sort_order: topupPackages.sort_order,
                 status: topupPackages.status,
                 fileAPI: topupPackages.fileAPI,
                 id_server: topupPackages.id_server,
@@ -183,7 +215,7 @@ const PackageService = {
             .from(topupPackages)
             .innerJoin(games, eq(topupPackages.game_id, games.id))
             .where(and(...conditions))
-            .orderBy(asc(topupPackages.price_basic));
+            .orderBy(...packageOrderBy);
 
         return result.map(hydratePackage);
     },
@@ -210,7 +242,9 @@ const PackageService = {
             ...pricing,
             thumbnail: file?.path || normalizeString(data.thumbnail, 500) || game.thumbnail || null,
             package_type: normalizeString(data.package_type, 50) || null,
+            sort_order: normalizeInteger(data.sort_order, 0),
             status: normalizeStatus(data.status, "active"),
+            sync_auto_reenable: false,
             fileAPI: parsedFileAPI,
             id_server: normalizeBoolean(data.id_server, false),
             sale: normalizeBoolean(data.sale, false),
@@ -222,7 +256,10 @@ const PackageService = {
 
     patchPackage: async (id, newStatus) => {
         const normalizedStatus = normalizeStatus(newStatus, "active");
-        await db.update(topupPackages).set({ status: normalizedStatus }).where(eq(topupPackages.id, id));
+        await db
+            .update(topupPackages)
+            .set({ status: normalizedStatus, sync_auto_reenable: false })
+            .where(eq(topupPackages.id, id));
         return await PackageService.getPackageById(id);
     },
 
@@ -231,7 +268,16 @@ const PackageService = {
         if (!currentPkg) throw { status: 404, message: "Goi khong ton tai" };
 
         const updateData = {};
+        let parsedFileAPI;
         const names = buildNameFields(data, currentPkg);
+
+        if (data.fileAPI !== undefined) {
+            try {
+                parsedFileAPI = typeof data.fileAPI === "string" ? JSON.parse(data.fileAPI) : data.fileAPI;
+            } catch (error) {
+                parsedFileAPI = null;
+            }
+        }
 
         if (
             data.package_name !== undefined ||
@@ -251,13 +297,21 @@ const PackageService = {
             data.profit_percent_plus !== undefined
         ) {
             Object.assign(updateData, buildPricingFields(data, currentPkg));
+            updateData.fileAPI = withAdminPriceOverrideMeta(
+                parsedFileAPI !== undefined ? parsedFileAPI : currentPkg.fileAPI,
+                true
+            );
         }
 
         if (data.api_id !== undefined) updateData.api_id = normalizeString(data.api_id, 100) || null;
         if (data.package_type !== undefined) updateData.package_type = normalizeString(data.package_type, 50) || null;
+        if (data.sort_order !== undefined) updateData.sort_order = normalizeInteger(data.sort_order, currentPkg.sort_order || 0);
         if (data.id_server !== undefined) updateData.id_server = normalizeBoolean(data.id_server, false);
         if (data.sale !== undefined) updateData.sale = normalizeBoolean(data.sale, false);
-        if (data.status !== undefined) updateData.status = normalizeStatus(data.status, currentPkg.status || "active");
+        if (data.status !== undefined) {
+            updateData.status = normalizeStatus(data.status, currentPkg.status || "active");
+            updateData.sync_auto_reenable = false;
+        }
         if (data.thumbnail !== undefined) updateData.thumbnail = normalizeString(data.thumbnail, 500) || null;
 
         let oldThumbnailToDelete = null;
@@ -268,13 +322,8 @@ const PackageService = {
             }
         }
 
-        if (data.fileAPI !== undefined) {
-            try {
-                updateData.fileAPI =
-                    typeof data.fileAPI === "string" ? JSON.parse(data.fileAPI) : data.fileAPI;
-            } catch (error) {
-                updateData.fileAPI = null;
-            }
+        if (data.fileAPI !== undefined && updateData.fileAPI === undefined) {
+            updateData.fileAPI = parsedFileAPI;
         }
 
         if (Object.keys(updateData).length === 0) {
@@ -296,7 +345,7 @@ const PackageService = {
             .select()
             .from(topupPackages)
             .where(eq(topupPackages.package_type, type))
-            .orderBy(asc(topupPackages.price_basic));
+            .orderBy(...packageOrderBy);
         return result.map(hydratePackage);
     },
 
@@ -344,7 +393,7 @@ const PackageService = {
             .select()
             .from(topupPackages)
             .where(and(...conditions))
-            .orderBy(asc(topupPackages.origin_price));
+            .orderBy(...packageOrderBy);
 
         return result.map(hydratePackage);
     },

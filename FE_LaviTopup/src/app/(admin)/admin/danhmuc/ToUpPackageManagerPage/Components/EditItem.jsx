@@ -8,7 +8,7 @@ const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
 
 export default function EditPkg({ pkg, onCancel }) {
     const [form, setForm] = useState({
-        package_name: pkg.package_name,
+        package_name: pkg.custom_package_name || pkg.package_name,
         price: pkg.price,
         origin_price: pkg.origin_price,
         package_type: pkg.package_type,
@@ -62,7 +62,7 @@ export default function EditPkg({ pkg, onCancel }) {
         }
 
         const formData = new FormData()
-        formData.append("package_name", form.package_name)
+        formData.append("custom_package_name", form.package_name)
         formData.append("price", form.price)
         formData.append("origin_price", form.origin_price)
         formData.append("package_type", form.package_type)

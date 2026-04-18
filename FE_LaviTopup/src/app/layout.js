@@ -17,15 +17,28 @@ export const metadata = {
         default: "LaviTopup | Topup và tài khoản game",
         template: "%s | LaviTopup",
     },
-    description: "LaviTopup cung cấp topup và tài khoản game với giao diện rõ ràng, thao tác nhanh và hỗ trợ trực tiếp khi cần.",
-    keywords: ["LaviTopup", "topup game", "nạp game", "tài khoản game", "mua tài khoản game", "shop acc"],
+    description:
+        "LaviTopup cung cấp topup và tài khoản game với giao diện rõ ràng, thao tác nhanh và hỗ trợ trực tiếp khi cần.",
+    keywords: [
+        "LaviTopup",
+        "topup game",
+        "nạp game",
+        "tài khoản game",
+        "mua tài khoản game",
+        "shop acc",
+        "MLBB",
+        "Mobile Legends",
+    ],
     authors: [{ name: "LaviTopup" }],
     creator: "LaviTopup",
     publisher: "LaviTopup",
+    applicationName: "LaviTopup",
+    category: "games",
+    manifest: "/site.webmanifest",
     icons: {
-        icon: "/imgs/removed_bg.png",
-        shortcut: "/imgs/removed_bg.png",
-        apple: "/imgs/removed_bg.png",
+        icon: [{ url: "/favicon.png", type: "image/png" }],
+        shortcut: "/favicon.png",
+        apple: "/favicon.png",
     },
     openGraph: {
         type: "website",
@@ -33,10 +46,11 @@ export const metadata = {
         url: siteUrl,
         siteName: "LaviTopup",
         title: "LaviTopup | Topup và tài khoản game",
-        description: "Topup nhanh, giao diện dễ dùng và hỗ trợ trực tiếp cho các nhu cầu mua tài khoản game tại LaviTopup.",
+        description:
+            "Topup nhanh, giao diện dễ dùng và hỗ trợ trực tiếp cho các nhu cầu mua tài khoản game tại LaviTopup.",
         images: [
             {
-                url: "/banner/logo.png",
+                url: "/banner/logo.jpg",
                 width: 1536,
                 height: 864,
                 alt: "LaviTopup",
@@ -46,12 +60,20 @@ export const metadata = {
     twitter: {
         card: "summary_large_image",
         title: "LaviTopup | Topup và tài khoản game",
-        description: "Topup nhanh, giao diện dễ dùng và hỗ trợ trực tiếp cho các nhu cầu mua tài khoản game tại LaviTopup.",
-        images: ["/banner/logo.png"],
+        description:
+            "Topup nhanh, giao diện dễ dùng và hỗ trợ trực tiếp cho các nhu cầu mua tài khoản game tại LaviTopup.",
+        images: ["/banner/logo.jpg"],
     },
     robots: {
         index: true,
         follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+            "max-video-preview": -1,
+        },
     },
     alternates: {
         canonical: siteUrl,
